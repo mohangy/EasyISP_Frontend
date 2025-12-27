@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Plus, Download, RotateCcw, Loader2, FilterX, Search } from "lucide-react";
+import { Plus, Download, RotateCcw, Loader2, Search } from "lucide-react";
 import { customerApi, type Customer } from "../../services/customerService";
 import toast from "react-hot-toast";
 import { PERMISSIONS } from "../../lib/permissions";
@@ -59,20 +59,8 @@ export function HotspotCustomers() {
             setTotalCustomers(response.total);
         } catch (error) {
             console.error("Failed to fetch hotspot customers:", error);
-            // Mock data fallback... (omitted for brevity, assume real API works or existing mock)
-            // Using exiting mock data logic but filtering it manually for demo if API fails
-            const mockData = [
-                { id: "hs-1", username: "TLQBU2595H", name: "Guest 1", connectionType: "HOTSPOT", status: "ACTIVE", isOnline: true, package: { id: "p1", name: "5 gb for 1 day", price: 20 }, ipAddress: "172.16.0.240", macAddress: "4A:3F:4D:E5:F0:17", nas: { id: "n1", name: "5009" }, createdAt: "2025-12-26T00:02:00Z", updatedAt: "2025-12-26T00:02:00Z" },
-                // ... (rest of mock data)
-            ] as any[]; // Simplified for this edit
-
-            // Basic mock filtering
-            let filtered = mockData;
-            if (packageFilter) filtered = filtered.filter(c => c.package.id === packageFilter);
-            if (statusFilter) filtered = filtered.filter(c => c.status === statusFilter);
-
-            setCustomers(filtered as Customer[]);
-            setTotalCustomers(filtered.length);
+            setCustomers([]);
+            setTotalCustomers(0);
         } finally {
             setLoading(false);
         }

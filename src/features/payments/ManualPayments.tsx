@@ -1,42 +1,55 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, FileDown, RotateCcw, Loader2, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Modal } from "../../components/ui/Modal";
+import api from "../../services/api";
 
-// Mock Data
-const MOCK_RECHARGES = Array.from({ length: 158 }).map((_, i) => ({
-    id: i + 1,
-    ref: `TL${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
-    account: `07${Math.floor(Math.random() * 100000000).toString().padStart(8, '0')}`,
-    amount: [1500, 2500, 100, 2000][Math.floor(Math.random() * 4)],
-    description: [
-        "Paid to Mwachayamu Paybill",
-        "Paid Via Till, Not Picked by system",
-        "PAID CASH",
-        "Paid to Mwachayamu"
-    ][Math.floor(Math.random() * 4)],
-    date: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toLocaleString('en-GB', {
-        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
-    }).replace(',', '')
-}));
-
-const TOTAL_AMOUNT = MOCK_RECHARGES.reduce((sum, item) => sum + item.amount, 0);
+interface ManualRecharge {
+    id: number;
+    ref: string;
+    account: string;
+    amount: number;
+    description: string;
+    date: string;
+}
 
 export function ManualPayments() {
     const [searchQuery, setSearchQuery] = useState("");
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [currentPage, setCurrentPage] = useState(1);
-    const [loading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [recharges, setRecharges] = useState<ManualRecharge[]>([]);
+    const [totalAmount, setTotalAmount] = useState(0);
+
+    // Fetch manual recharges from API
+    useEffect(() => {
+        const fetchRecharges = async () => {
+            setLoading(true);
+            try {
+                const response = await api.get('/payments/manual');
+                const data = response.data || [];
+                setRecharges(data);
+                setTotalAmount(data.reduce((sum: number, item: ManualRecharge) => sum + item.amount, 0));
+            } catch (error) {
+                console.error("Failed to fetch manual recharges:", error);
+                setRecharges([]);
+                setTotalAmount(0);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchRecharges();
+    }, []);
 
     // Filter Logic
     const filteredData = useMemo(() => {
-        return MOCK_RECHARGES.filter(item =>
+        return recharges.filter(item =>
             item.ref.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.account.includes(searchQuery) ||
             item.description.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }, [searchQuery]);
+    }, [searchQuery, recharges]);
 
     // Pagination Logic
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);

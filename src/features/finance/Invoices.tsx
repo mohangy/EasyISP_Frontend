@@ -1,18 +1,16 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
 import {
     Search,
     Plus,
     FileDown,
     RotateCcw,
-    Filter,
     Eye,
-    Send,
     CheckCircle2,
     Clock,
     AlertCircle,
     XCircle,
-    MoreVertical
+    MoreVertical,
+    Send
 } from "lucide-react";
 import { Modal } from "../../components/ui/Modal";
 import toast from "react-hot-toast";
@@ -27,20 +25,6 @@ const formatCurrency = (amount: number) => {
     }).format(amount);
 };
 
-// Mock invoice data
-const MOCK_INVOICES = Array.from({ length: 50 }).map((_, i) => ({
-    id: `INV-${String(2024001 + i).padStart(7, '0')}`,
-    customerId: 1000 + i,
-    customerName: ["John Doe", "Jane Smith", "Alex Mwangi", "Grace Ochieng", "Peter Kamau"][i % 5],
-    customerPhone: ["0712345678", "0723456789", "0734567890", "0745678901", "0756789012"][i % 5],
-    amount: [3000, 4500, 5000, 7500, 10000][i % 5],
-    status: ["paid", "pending", "overdue", "draft", "cancelled"][i % 5] as "paid" | "pending" | "overdue" | "draft" | "cancelled",
-    dueDate: new Date(Date.now() + (i % 5 - 2) * 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB'),
-    createdAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB'),
-    items: [
-        { description: "Monthly Internet Subscription - 10 Mbps", quantity: 1, unitPrice: [3000, 4500, 5000, 7500, 10000][i % 5] }
-    ]
-}));
 
 const STATUS_CONFIG = {
     paid: { label: "Paid", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400", icon: CheckCircle2 },
@@ -56,10 +40,11 @@ export function Invoices() {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [invoices, setInvoices] = useState<any[]>([]);  // Will fetch from API
 
     // Filter logic
     const filteredData = useMemo(() => {
-        return MOCK_INVOICES.filter(invoice => {
+        return invoices.filter(invoice => {
             const matchesSearch =
                 invoice.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 invoice.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -67,7 +52,7 @@ export function Invoices() {
             const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
-    }, [searchQuery, statusFilter]);
+    }, [searchQuery, statusFilter, invoices]);
 
     // Pagination
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -78,12 +63,12 @@ export function Invoices() {
 
     // Stats
     const stats = useMemo(() => {
-        const total = MOCK_INVOICES.reduce((sum, inv) => sum + inv.amount, 0);
-        const paid = MOCK_INVOICES.filter(inv => inv.status === "paid").reduce((sum, inv) => sum + inv.amount, 0);
-        const pending = MOCK_INVOICES.filter(inv => inv.status === "pending").reduce((sum, inv) => sum + inv.amount, 0);
-        const overdue = MOCK_INVOICES.filter(inv => inv.status === "overdue").reduce((sum, inv) => sum + inv.amount, 0);
+        const total = invoices.reduce((sum, inv) => sum + inv.amount, 0);
+        const paid = invoices.filter(inv => inv.status === "paid").reduce((sum, inv) => sum + inv.amount, 0);
+        const pending = invoices.filter(inv => inv.status === "pending").reduce((sum, inv) => sum + inv.amount, 0);
+        const overdue = invoices.filter(inv => inv.status === "overdue").reduce((sum, inv) => sum + inv.amount, 0);
         return { total, paid, pending, overdue };
-    }, []);
+    }, [invoices]);
 
     const handleExport = () => {
         toast.promise(

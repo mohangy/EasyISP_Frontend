@@ -1,4 +1,3 @@
-import api from "./api";
 import type { Package } from "../types/package";
 
 // Mock data based on screenshots

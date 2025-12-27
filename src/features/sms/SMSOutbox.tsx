@@ -1,45 +1,56 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, FileDown, RotateCcw, Loader2, Trash2, Settings, PenSquare, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
 import { Modal } from "../../components/ui/Modal";
 import { usePermissions } from "../../hooks/usePermissions";
 import { PERMISSIONS } from "../../lib/permissions";
+import api from "../../services/api";
 
-// Mock Data
-const MOCK_SMS_LOGS = Array.from({ length: 313 }).map((_, i) => ({
-    id: 1420120 - i,
-    phone: ["254721731746", "0706663600", "0727660369", "254712345678"][Math.floor(Math.random() * 4)],
-    message: [
-        "Dear CHARLSE, your Monthly 7 Mbps internet subscription has expired.",
-        "Dear Hindawiya, KES 4000.00 for account 0706663600 has been received.",
-        "Dear Hindawiya, Your Monthly 30 Mbps internet package has been renewed.",
-        "Dear CHRISTINE, your Monthly 7 Mbps internet subscription is active."
-    ][Math.floor(Math.random() * 4)],
-    status: "success",
-    initiator: ["subscription expiry", "lipa na paybill", "renew subscription"][Math.floor(Math.random() * 3)],
-    date: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toLocaleString('en-GB', {
-        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
-    }).replace(',', '')
-}));
+interface SMSLog {
+    id: number;
+    phone: string;
+    message: string;
+    status: string;
+    initiator: string;
+    date: string;
+}
 
 export function SMSOutbox() {
     const { can } = usePermissions();
     const [searchQuery, setSearchQuery] = useState("");
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [currentPage, setCurrentPage] = useState(1);
-    const [loading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [showClearModal, setShowClearModal] = useState(false);
     const [showComposeModal, setShowComposeModal] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [smsLogs, setSmsLogs] = useState<SMSLog[]>([]);
+
+    // Fetch SMS logs from API
+    useEffect(() => {
+        const fetchSMSLogs = async () => {
+            setLoading(true);
+            try {
+                const response = await api.get('/sms/logs');
+                setSmsLogs(response.data || []);
+            } catch (error) {
+                console.error("Failed to fetch SMS logs:", error);
+                setSmsLogs([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSMSLogs();
+    }, []);
 
     // Filter Logic
     const filteredData = useMemo(() => {
-        return MOCK_SMS_LOGS.filter(item =>
+        return smsLogs.filter(item =>
             item.phone.includes(searchQuery) ||
             item.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.initiator.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }, [searchQuery]);
+    }, [searchQuery, smsLogs]);
 
     // Pagination Logic
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);

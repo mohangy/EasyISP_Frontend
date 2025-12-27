@@ -14,19 +14,11 @@ interface Transaction {
     status: 'posted' | 'pending';
 }
 
-// Mock Expense Transactions
-const MOCK_EXPENSES: Transaction[] = [
-    { id: 'exp-1', date: '2024-12-26T14:00:00', description: 'Safaricom Bandwidth Payment', reference: 'INV-001', amount: 125000, type: 'debit', category: 'Bandwidth', status: 'posted' },
-    { id: 'exp-2', date: '2024-12-25T09:00:00', description: 'Office Rent - December', reference: 'RENT-DEC', amount: 45000, type: 'debit', category: 'Rent', status: 'posted' },
-    { id: 'exp-3', date: '2024-12-24T16:30:00', description: 'Staff Lunch', reference: 'EXP-102', amount: 2500, type: 'debit', category: 'Meals', status: 'posted' },
-    { id: 'exp-4', date: '2024-12-23T11:00:00', description: 'Fiber Cable Purchase', reference: 'PO-405', amount: 15000, type: 'debit', category: 'Equipment', status: 'posted' },
-    { id: 'exp-5', date: '2024-12-22T10:00:00', description: 'Electricity Token', reference: 'UTIL-003', amount: 5000, type: 'debit', category: 'Utilities', status: 'posted' },
-];
 
 export function Transactions() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState(\"\");
     const [typeFilter, setTypeFilter] = useState<'all' | 'credit' | 'debit'>('all');
 
     useEffect(() => {
@@ -47,8 +39,8 @@ export function Transactions() {
                     status: 'posted'
                 }));
 
-                // Combine with mock expenses
-                const allTransactions = [...incomeTransactions, ...MOCK_EXPENSES].sort((a, b) =>
+                // Sort by date
+                const allTransactions = incomeTransactions.sort((a, b) =>
                     new Date(b.date).getTime() - new Date(a.date).getTime()
                 );
 

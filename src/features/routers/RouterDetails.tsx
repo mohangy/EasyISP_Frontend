@@ -18,7 +18,6 @@ import {
     Download,
     Power,
     Globe,
-    Monitor,
     Shield,
     BarChart3,
     TrendingUp,
@@ -158,21 +157,7 @@ export function RouterDetails() {
         }
     };
 
-    const handleGenerateConfig = async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!router) return;
 
-        try {
-            const data = await nasApi.getConfigScript(router.id);
-            // In a real app, this would show a modal or copy to clipboard
-            // For now, let's copy to clipboard
-            await navigator.clipboard.writeText(data.script);
-            toast.success("Configuration script copied to clipboard");
-        } catch (error) {
-            console.error("Failed to generate config:", error);
-            toast.error("Failed to generate configuration");
-        }
-    };
 
     const handleFetchSessions = async (type: 'pppoe' | 'hotspot' | 'all') => {
         if (selectedSessionType === type) {

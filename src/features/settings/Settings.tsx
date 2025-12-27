@@ -529,7 +529,7 @@ function InvoicesTab() {
 
 // ============ PAYMENT GATEWAY TAB ============
 function PaymentGatewayTab() {
-    const [selectedGateway, setSelectedGateway] = useState("");
+
     const [paymentOptions, setPaymentOptions] = useState([
         { id: "1", name: "MPESA_API", label: "M-Pesa (API)", isDefault: true, shortcode: "174379", passkey: "***hidden***" },
     ]);

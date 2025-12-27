@@ -13,42 +13,15 @@ interface Account {
     isSystem: boolean; // System accounts cannot be deleted
 }
 
-const MOCK_ACCOUNTS: Account[] = [
-    // Assets
-    { id: '1', code: '1000', name: 'Current Assets', type: 'Asset', balance: 450000, isSystem: true },
-    { id: '2', code: '1001', name: 'Cash on Hand', type: 'Asset', balance: 50000, isSystem: false },
-    { id: '3', code: '1002', name: 'M-Pesa Float', type: 'Asset', balance: 150000, isSystem: false },
-    { id: '4', code: '1003', name: 'Bank - Equity', type: 'Asset', balance: 250000, isSystem: false },
-    { id: '5', code: '1200', name: 'Accounts Receivable', type: 'Asset', balance: 445600, isSystem: true },
-
-    // Liabilities
-    { id: '6', code: '2000', name: 'Accounts Payable', type: 'Liability', balance: 85000, isSystem: true },
-    { id: '7', code: '2001', name: 'VAT Payable', type: 'Liability', balance: 45000, isSystem: false },
-
-    // Equity
-    { id: '8', code: '3000', name: 'Owner\'s Capital', type: 'Equity', balance: 1000000, isSystem: true },
-    { id: '9', code: '3001', name: 'Retained Earnings', type: 'Equity', balance: 500000, isSystem: true },
-
-    // Revenue
-    { id: '10', code: '4000', name: 'Service Revenue', type: 'Revenue', balance: 2847500, isSystem: true },
-    { id: '11', code: '4001', name: 'Internet Subscriptions', type: 'Revenue', balance: 2345000, isSystem: false },
-    { id: '12', code: '4002', name: 'Installation Fees', type: 'Revenue', balance: 285000, isSystem: false },
-    { id: '13', code: '4003', name: 'Equipment Sales', type: 'Revenue', balance: 156500, isSystem: false },
-
-    // Expenses
-    { id: '14', code: '5000', name: 'Operating Expenses', type: 'Expense', balance: 892340, isSystem: true },
-    { id: '15', code: '5001', name: 'Bandwidth Costs', type: 'Expense', balance: 423400, isSystem: false },
-    { id: '16', code: '5002', name: 'Salaries & Wages', type: 'Expense', balance: 245000, isSystem: false },
-    { id: '17', code: '5003', name: 'Rent Expense', type: 'Expense', balance: 65440, isSystem: false },
-];
 
 export function ChartOfAccounts() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterType, setFilterType] = useState<string>("All");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [accounts, setAccounts] = useState<Account[]>([]);  // Will fetch from API
 
     // Filter logic
-    const filteredAccounts = MOCK_ACCOUNTS.filter(acc => {
+    const filteredAccounts = accounts.filter(acc => {
         const matchesSearch = acc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             acc.code.includes(searchQuery);
         const matchesType = filterType === "All" || acc.type === filterType;

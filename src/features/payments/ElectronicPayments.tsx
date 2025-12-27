@@ -1,35 +1,51 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ArrowLeft, Search, FileDown, RotateCcw, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import api from "../../services/api";
 
-// Mock Data
-const MOCK_TRANSACTIONS = Array.from({ length: 50 }).map((_, i) => ({
-    id: i + 1,
-    trxCode: `TLQ${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-    amount: [1500, 2000, 4000, 2500, 1000][Math.floor(Math.random() * 5)],
-    date: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toLocaleString('en-US', {
-        day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true
-    }),
-    phone: `07${Math.floor(Math.random() * 100000000).toString().padStart(8, '0')}`,
-    account: `07${Math.floor(Math.random() * 100000000).toString().padStart(8, '0')}`,
-    site: ''
-}));
+interface ElectronicTransaction {
+    id: number;
+    trxCode: string;
+    amount: number;
+    date: string;
+    phone: string;
+    account: string;
+    site: string;
+}
 
 export function ElectronicPayments() {
     const [searchQuery, setSearchQuery] = useState("");
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [currentPage, setCurrentPage] = useState(1);
-    const [loading] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [transactions, setTransactions] = useState<ElectronicTransaction[]>([]);
+
+    // Fetch electronic transactions from API
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            setLoading(true);
+            try {
+                const response = await api.get('/payments/mpesa');
+                setTransactions(response.data || []);
+            } catch (error) {
+                console.error("Failed to fetch M-Pesa transactions:", error);
+                setTransactions([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTransactions();
+    }, []);
 
     // Filter Logic
     const filteredData = useMemo(() => {
-        return MOCK_TRANSACTIONS.filter(item =>
+        return transactions.filter(item =>
             item.trxCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.phone.includes(searchQuery) ||
             item.account.includes(searchQuery)
         );
-    }, [searchQuery]);
+    }, [searchQuery, transactions]);
 
     // Pagination Logic
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);

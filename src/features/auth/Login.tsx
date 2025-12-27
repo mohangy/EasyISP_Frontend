@@ -3,64 +3,8 @@ import { useAuthStore } from "../../store/authStore";
 import { useNavigate, Link } from "react-router-dom";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
-import { Wifi, Eye, EyeOff, Shield, UserCheck, Headphones, Wrench } from "lucide-react";
-import type { User } from "../../types";
-
-// Mock users for testing different roles
-const MOCK_USERS: { user: User; icon: React.ReactNode; color: string }[] = [
-    {
-        user: {
-            id: "super-admin-1",
-            email: "superadmin@easyisp.com",
-            name: "Super Admin",
-            role: "SUPER_ADMIN",
-            tenantId: "tenant-1",
-            addedPermissions: [],
-            removedPermissions: [],
-        },
-        icon: <Shield className="w-4 h-4" />,
-        color: "from-purple-600 to-pink-600",
-    },
-    {
-        user: {
-            id: "admin-1",
-            email: "admin@easyisp.com",
-            name: "Admin User",
-            role: "ADMIN",
-            tenantId: "tenant-1",
-            addedPermissions: [],
-            removedPermissions: [],
-        },
-        icon: <UserCheck className="w-4 h-4" />,
-        color: "from-blue-600 to-cyan-600",
-    },
-    {
-        user: {
-            id: "care-1",
-            email: "care@easyisp.com",
-            name: "Customer Care",
-            role: "CUSTOMER_CARE",
-            tenantId: "tenant-1",
-            addedPermissions: [],
-            removedPermissions: [],
-        },
-        icon: <Headphones className="w-4 h-4" />,
-        color: "from-green-600 to-emerald-600",
-    },
-    {
-        user: {
-            id: "tech-1",
-            email: "tech@easyisp.com",
-            name: "Field Technician",
-            role: "FIELD_TECH",
-            tenantId: "tenant-1",
-            addedPermissions: [],
-            removedPermissions: [],
-        },
-        icon: <Wrench className="w-4 h-4" />,
-        color: "from-orange-600 to-amber-600",
-    },
-];
+import { Wifi, Eye, EyeOff } from "lucide-react";
+import { authApi } from "../../services/authService";
 
 export function Login() {
     const [email, setEmail] = useState("");
@@ -70,32 +14,20 @@ export function Login() {
     const login = useAuthStore((state) => state.login);
     const navigate = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setTimeout(() => {
-            if (email && password) {
-                login(
-                    {
-                        id: "1",
-                        email,
-                        name: "Test User",
-                        role: "ADMIN",
-                        tenantId: "tenant-1",
-                        addedPermissions: [],
-                        removedPermissions: [],
-                    },
-                    "mock-token"
-                );
-                navigate("/dashboard");
-            }
+        try {
+            const response = await authApi.login({ email, password });
+            login(response.user, response.token);
+            navigate("/dashboard");
+        } catch (error: any) {
+            // Handle login error - could show a toast/alert here
+            console.error("Login failed:", error.response?.data?.message || error.message);
+            alert(error.response?.data?.message || "Login failed. Please check your credentials.");
+        } finally {
             setIsLoading(false);
-        }, 1000);
-    };
-
-    const handleQuickLogin = (mockUser: typeof MOCK_USERS[0]) => {
-        login(mockUser.user, "mock-token");
-        navigate("/dashboard");
+        }
     };
 
     return (
@@ -225,26 +157,6 @@ export function Login() {
                                 Create one now
                             </Link>
                         </p>
-
-                        {/* Quick Login for Testing */}
-                        <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
-                            <p className="text-xs text-center text-slate-400 dark:text-slate-500 uppercase font-semibold mb-4">
-                                Quick Login (Testing)
-                            </p>
-                            <div className="grid grid-cols-2 gap-2">
-                                {MOCK_USERS.map((mock) => (
-                                    <button
-                                        key={mock.user.id}
-                                        type="button"
-                                        onClick={() => handleQuickLogin(mock)}
-                                        className={`flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r ${mock.color} text-white text-xs font-medium rounded-lg hover:opacity-90 transition-opacity shadow-md`}
-                                    >
-                                        {mock.icon}
-                                        {mock.user.role.replace("_", " ")}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

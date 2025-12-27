@@ -42,38 +42,17 @@ const CATEGORIES = {
 
 type ExpenseCategory = keyof typeof CATEGORIES;
 
-// Mock expense data
-const MOCK_EXPENSES = Array.from({ length: 40 }).map((_, i) => ({
-    id: `EXP-${String(2024001 + i).padStart(7, '0')}`,
-    description: [
-        "Safaricom Bandwidth - December",
-        "Staff Salaries - December",
-        "Office Rent - December",
-        "MikroTik Router x5",
-        "Facebook Ads Campaign",
-        "KPLC Electricity Bill",
-        "Office Supplies",
-        "Transport Allowance"
-    ][i % 8],
-    category: ["bandwidth", "salaries", "rent", "equipment", "marketing", "utilities", "other", "other"][i % 8] as ExpenseCategory,
-    vendor: ["Safaricom", "Staff", "Landlord", "MikroTik Kenya", "Meta", "KPLC", "Supplier", "Staff"][i % 8],
-    amount: [125000, 245000, 45000, 98500, 35000, 15440, 5000, 10000][i % 8],
-    paymentMethod: ["Bank Transfer", "Bank Transfer", "M-Pesa", "Bank Transfer", "Card", "M-Pesa", "Cash", "M-Pesa"][i % 8],
-    date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB'),
-    receipt: i % 3 === 0 ? "receipt.pdf" : null,
-    isRecurring: i % 4 === 0,
-}));
-
 export function Expenses() {
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState<string>("all");
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [expenses, setExpenses] = useState<any[]>([]);  // Will fetch from API
 
     // Filter logic
     const filteredData = useMemo(() => {
-        return MOCK_EXPENSES.filter(expense => {
+        return expenses.filter(expense => {
             const matchesSearch =
                 expense.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -81,7 +60,7 @@ export function Expenses() {
             const matchesCategory = categoryFilter === "all" || expense.category === categoryFilter;
             return matchesSearch && matchesCategory;
         });
-    }, [searchQuery, categoryFilter]);
+    }, [searchQuery, categoryFilter, expenses]);
 
     // Pagination
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -93,11 +72,11 @@ export function Expenses() {
     // Stats by category
     const statsByCategory = useMemo(() => {
         const stats: Record<string, number> = {};
-        MOCK_EXPENSES.forEach(exp => {
+        expenses.forEach(exp => {
             stats[exp.category] = (stats[exp.category] || 0) + exp.amount;
         });
         return stats;
-    }, []);
+    }, [expenses]);
 
     const totalExpenses = Object.values(statsByCategory).reduce((sum, val) => sum + val, 0);
 

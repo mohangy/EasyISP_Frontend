@@ -11,7 +11,6 @@ import {
     TestTube2,
     Shield,
     Clock,
-    ArrowUpRight,
     ArrowDownRight
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -303,8 +302,8 @@ export function MPesaSettings() {
                                     <div className="flex items-center justify-between mt-2">
                                         <span className="text-xs text-slate-400 font-mono">{tx.id}</span>
                                         <span className={`text-xs px-2 py-0.5 rounded-full ${tx.status === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                                tx.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                                                    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                            tx.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                             }`}>
                                             {tx.status}
                                         </span>

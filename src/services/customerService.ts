@@ -128,135 +128,7 @@ export interface Package {
     status: "ACTIVE" | "DISABLED";
 }
 
-// Mock PPPoE customers for development
-const MOCK_PPPOE_CUSTOMERS: Customer[] = [
-    {
-        id: "pppoe-001",
-        username: "0713038483",
-        name: "Rehma Omar",
-        email: "rehma.omar@gmail.com",
-        phone: "0713038483",
-        connectionType: "PPPOE",
-        status: "ACTIVE",
-        packageId: "pkg-001",
-        package: { id: "pkg-001", name: "Monthly 7 Mbps", price: 2500 },
-        nasId: "nas-001",
-        nas: { id: "nas-001", name: "CCR 2004" },
-        expiresAt: "2026-01-20T18:37:00Z",
-        macAddress: "18DED7D48236",
-        ipAddress: "192.25.245.150",
-        downloadSpeed: 7,
-        uploadSpeed: 7,
-        dataLimit: 50,
-        dataUsed: 5,
-        location: "Mazeras, Kwa Wanubi",
-        createdAt: "2025-12-20T18:37:54Z",
-        updatedAt: "2025-12-25T10:00:00Z",
-        isOnline: true,
-    },
-    {
-        id: "pppoe-002",
-        username: "0722345678",
-        name: "John Mwangi",
-        email: "john.m@email.com",
-        phone: "0722345678",
-        connectionType: "PPPOE",
-        status: "ACTIVE",
-        packageId: "pkg-002",
-        package: { id: "pkg-002", name: "Monthly 10 Mbps", price: 3500 },
-        nasId: "nas-001",
-        nas: { id: "nas-001", name: "CCR 2004" },
-        expiresAt: "2026-02-15T12:00:00Z",
-        macAddress: "A4B7D5C8F123",
-        ipAddress: "192.25.245.151",
-        downloadSpeed: 10,
-        uploadSpeed: 10,
-        location: "Kiembeni, Block B",
-        createdAt: "2025-11-15T08:00:00Z",
-        updatedAt: "2025-12-20T14:30:00Z",
-        isOnline: false,
-    },
-    {
-        id: "pppoe-003",
-        username: "0733456789",
-        name: "Alice Wanjiku",
-        email: "alice.wanjiku@email.com",
-        phone: "0733456789",
-        connectionType: "PPPOE",
-        status: "EXPIRED",
-        packageId: "pkg-001",
-        package: { id: "pkg-001", name: "Monthly 7 Mbps", price: 2500 },
-        nasId: "nas-002",
-        nas: { id: "nas-002", name: "Main Router" },
-        expiresAt: "2025-12-01T00:00:00Z",
-        macAddress: "C8D9E0F12345",
-        ipAddress: "192.25.245.152",
-        location: "Nyali, Beach Road",
-        createdAt: "2025-08-10T10:00:00Z",
-        updatedAt: "2025-12-01T00:00:00Z",
-        isOnline: false,
-    },
-    {
-        id: "pppoe-004",
-        username: "0744567890",
-        name: "Peter Ochieng",
-        phone: "0744567890",
-        connectionType: "PPPOE",
-        status: "SUSPENDED",
-        packageId: "pkg-003",
-        package: { id: "pkg-003", name: "Monthly 15 Mbps", price: 5000 },
-        nasId: "nas-001",
-        nas: { id: "nas-001", name: "CCR 2004" },
-        expiresAt: "2026-01-10T00:00:00Z",
-        location: "Mombasa CBD",
-        createdAt: "2025-09-05T14:00:00Z",
-        updatedAt: "2025-12-15T09:00:00Z",
-        isOnline: false,
-    },
-    {
-        id: "pppoe-005",
-        username: "0755678901",
-        name: "Mary Akinyi",
-        email: "mary.a@company.com",
-        phone: "0755678901",
-        connectionType: "PPPOE",
-        status: "ACTIVE",
-        packageId: "pkg-002",
-        package: { id: "pkg-002", name: "Monthly 10 Mbps", price: 3500 },
-        nasId: "nas-002",
-        nas: { id: "nas-002", name: "Main Router" },
-        expiresAt: "2026-03-01T18:00:00Z",
-        macAddress: "D1E2F3A4B5C6",
-        ipAddress: "192.25.245.155",
-        downloadSpeed: 10,
-        uploadSpeed: 10,
-        dataLimit: 100,
-        dataUsed: 45,
-        location: "Changamwe Industrial",
-        createdAt: "2025-10-20T11:00:00Z",
-        updatedAt: "2025-12-22T16:00:00Z",
-        isOnline: true,
-    },
-    {
-        id: "pppoe-006",
-        username: "0766789012",
-        name: "David Kimani",
-        phone: "0766789012",
-        connectionType: "PPPOE",
-        status: "ACTIVE",
-        packageId: "pkg-001",
-        package: { id: "pkg-001", name: "Monthly 7 Mbps", price: 2500 },
-        nasId: "nas-001",
-        nas: { id: "nas-001", name: "CCR 2004" },
-        expiresAt: "2026-01-28T10:00:00Z",
-        macAddress: "E2F3A4B5C6D7",
-        ipAddress: "192.25.245.160",
-        location: "Likoni Ferry",
-        createdAt: "2025-07-15T08:30:00Z",
-        updatedAt: "2025-12-28T10:00:00Z",
-        isOnline: true,
-    },
-];
+
 
 export const customerApi = {
     // Get list of customers with filters
@@ -299,81 +171,21 @@ export const customerApi = {
         await api.delete(`/customers/${id}`);
     },
 
-    // Get PPPoE customers specifically (with mock fallback)
+    // Get PPPoE customers specifically
     getPPPoECustomers: async (filters: Omit<CustomerFilters, "connectionType"> = {}): Promise<CustomerListResponse> => {
-        try {
-            return await customerApi.getCustomers({ ...filters, connectionType: "PPPOE" });
-        } catch {
-            // Return mock data for development
-            let filtered = [...MOCK_PPPOE_CUSTOMERS];
-
-            // Apply filters
-            if (filters.status) {
-                filtered = filtered.filter(c => c.status === filters.status);
-            }
-            if (filters.search) {
-                const search = filters.search.toLowerCase();
-                filtered = filtered.filter(c =>
-                    c.username.toLowerCase().includes(search) ||
-                    c.name.toLowerCase().includes(search) ||
-                    c.phone?.toLowerCase().includes(search)
-                );
-            }
-
-            // Pagination
-            const page = filters.page || 1;
-            const pageSize = filters.pageSize || 20;
-            const start = (page - 1) * pageSize;
-            const paged = filtered.slice(start, start + pageSize);
-
-            return {
-                customers: paged,
-                total: filtered.length,
-                page,
-                pageSize,
-                totalPages: Math.ceil(filtered.length / pageSize),
-            };
-        }
+        return await customerApi.getCustomers({ ...filters, connectionType: "PPPOE" });
     },
 
-    // Get single customer by ID (with mock fallback)
+    // Get single customer by ID
     getCustomerDetails: async (id: string): Promise<CustomerDetails> => {
-        try {
-            const response = await api.get<CustomerDetails>(`/customers/${id}`);
-            return response.data;
-        } catch {
-            // Return mock data for development
-            const customer = MOCK_PPPOE_CUSTOMERS.find(c => c.id === id);
-            if (!customer) {
-                throw new Error("Customer not found");
-            }
-            return {
-                ...customer,
-                password: customer.username, // Mock: password same as username
-                walletBalance: 0,
-                totalSpent: 0,
-                monthlyUsage: { download: 5, upload: 49 },
-                lastIp: customer.ipAddress || "192.25.245.150",
-                lastMac: customer.macAddress || "18DED7D48236",
-                vendor: "HUAWEI TECHNOLOGIES CO.,LTD",
-                site: `${customer.nas?.name || "Main Router"} (100.105.2.112)`,
-                uptime: customer.isOnline ? "1d9h19min54s" : undefined,
-            };
-        }
+        const response = await api.get<CustomerDetails>(`/customers/${id}`);
+        return response.data;
     },
 
     // Get customer transactions (Mpesa and Manual)
     getTransactions: async (customerId: string): Promise<TransactionsResponse> => {
-        try {
-            const response = await api.get<TransactionsResponse>(`/customers/${customerId}/transactions`);
-            return response.data;
-        } catch {
-            // Return empty arrays for development (no transactions yet)
-            return {
-                mpesaTransactions: [],
-                manualTransactions: []
-            };
-        }
+        const response = await api.get<TransactionsResponse>(`/customers/${customerId}/transactions`);
+        return response.data;
     },
 
     // Get Hotspot customers specifically
@@ -420,22 +232,9 @@ export const customerApi = {
 
     // Get available packages for selection
     getPackages: async (serviceType?: "PPPOE" | "HOTSPOT"): Promise<Package[]> => {
-        try {
-            const params = serviceType ? `?serviceType=${serviceType}` : "";
-            const response = await api.get<Package[]>(`/packages${params}`);
-            return response.data;
-        } catch {
-            // Return mock packages for development
-            const mockPackages: Package[] = [
-                { id: "pkg-1", name: "Basic 5Mbps", price: 1500, downloadSpeed: 5, uploadSpeed: 1, serviceType: "PPPOE", status: "ACTIVE" },
-                { id: "pkg-2", name: "Standard 10Mbps", price: 2500, downloadSpeed: 10, uploadSpeed: 2, serviceType: "PPPOE", status: "ACTIVE" },
-                { id: "pkg-3", name: "Premium 20Mbps", price: 4000, downloadSpeed: 20, uploadSpeed: 5, serviceType: "PPPOE", status: "ACTIVE" },
-                { id: "pkg-4", name: "Ultra 50Mbps", price: 7500, downloadSpeed: 50, uploadSpeed: 10, serviceType: "PPPOE", status: "ACTIVE" },
-                { id: "pkg-5", name: "Hotspot Daily", price: 20, downloadSpeed: 5, uploadSpeed: 5, serviceType: "HOTSPOT", status: "ACTIVE" },
-                { id: "pkg-6", name: "Hotspot Weekly", price: 100, downloadSpeed: 10, uploadSpeed: 10, serviceType: "HOTSPOT", status: "ACTIVE" },
-            ];
-            return serviceType ? mockPackages.filter(p => p.serviceType === serviceType) : mockPackages;
-        }
+        const params = serviceType ? `?serviceType=${serviceType}` : "";
+        const response = await api.get<Package[]>(`/packages${params}`);
+        return response.data;
     },
 
     // Get active hotspot users from MikroTik via backend

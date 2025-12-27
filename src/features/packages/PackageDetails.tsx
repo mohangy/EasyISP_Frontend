@@ -246,7 +246,7 @@ export function PackageDetails() {
                                                     color: '#f8fafc'
                                                 }}
                                                 cursor={{ fill: '#334155', opacity: 0.4 }}
-                                                formatter={(value: number) => [value ? `KES ${value.toLocaleString()}` : 'KES 0', 'Revenue']}
+                                                formatter={(value: number | undefined) => [value ? `KES ${value.toLocaleString()}` : 'KES 0', 'Revenue']}
                                             />
                                             <Bar
                                                 dataKey="revenue"
