@@ -1,0 +1,328 @@
+@import "tailwindcss";
+
+/* Custom CSS Variables for theming */
+:root {
+    --primary: 220 90% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 33% 17%;
+    --accent: 262 83% 58%;
+    --background: 220 14% 96%;
+    --foreground: 220 9% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 9% 13%;
+    --muted: 220 14% 90%;
+    --muted-foreground: 220 9% 46%;
+    --border: 220 13% 88%;
+    --ring: 220 90% 56%;
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(220 90% 56%) 0%, hsl(262 83% 58%) 100%);
+    --gradient-dark: linear-gradient(135deg, hsl(217 33% 17%) 0%, hsl(220 26% 14%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+.dark {
+    --primary: 220 90% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 33% 17%;
+    --accent: 262 83% 65%;
+    --background: 222 47% 8%;
+    --foreground: 210 20% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 20% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --border: 217 33% 20%;
+    --ring: 220 90% 60%;
+}
+
+/* Base styles */
+* {
+    border-color: hsl(var(--border));
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Hide scrollbar for horizontal scroll on mobile */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 20px 5px hsl(var(--primary) / 0.2);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.3s ease-out forwards;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Glassmorphism utility */
+.glass {
+    background: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
+}
+
+.dark .glass {
+    background: hsl(var(--card) / 0.6);
+    border: 1px solid hsl(var(--border) / 0.3);
+}
+
+/* Gradient text */
+.gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Premium card hover effect */
+.card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -12px hsl(var(--primary) / 0.15);
+}
+
+/* Sidebar active indicator */
+.nav-active {
+    position: relative;
+}
+
+.nav-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 60%;
+    background: var(--gradient-primary);
+    border-radius: 0 4px 4px 0;
+}
+
+/* Button gradient */
+.btn-gradient {
+    background: var(--gradient-primary);
+    transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px -5px hsl(var(--primary) / 0.4);
+}
+
+/* Stat card icons */
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: 0 8px 16px -4px hsl(var(--primary) / 0.3);
+}
+
+/* Input focus ring */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: hsl(var(--ring));
+    border-color: hsl(var(--ring));
+}
+
+/* Loading skeleton */
+.skeleton {
+    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted) / 0.5) 50%, hsl(var(--muted)) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius);
+}
+
+/* Status indicators */
+.status-online {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+}
+
+.status-offline {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none;
+    }
+}
+
+@media (min-width: 769px) {
+    .show-mobile-only {
+        display: none;
+    }
+}
+
+/* Elevated card utility - for consistent pop-up effect */
+.card-elevated {
+    background: hsl(var(--card) / 0.9);
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 1rem;
+    box-shadow:
+        0 20px 25px -5px hsl(var(--foreground) / 0.05),
+        0 10px 10px -5px hsl(var(--foreground) / 0.02);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-elevated:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 25px 50px -12px hsl(var(--primary) / 0.15),
+        0 12px 20px -8px hsl(var(--foreground) / 0.05);
+}
+
+.dark .card-elevated {
+    box-shadow:
+        0 20px 25px -5px hsl(var(--background) / 0.3),
+        0 10px 10px -5px hsl(var(--background) / 0.2);
+}
+
+.dark .card-elevated:hover {
+    box-shadow:
+        0 25px 50px -12px hsl(var(--primary) / 0.2),
+        0 12px 20px -8px hsl(var(--background) / 0.3);
+}
+
+/* Leaflet Map Custom Markers */
+.leaflet-div-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.leaflet-marker-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Ensure Leaflet map containers stay below sidebar on mobile */
+.leaflet-container {
+    z-index: 10 !important;
+}
+
+.leaflet-pane {
+    z-index: 10 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+    z-index: 20 !important;
+}
+
+/* Mobile map overlay controls should stay below sidebar */
+@media (max-width: 1023px) {
+
+    .leaflet-container,
+    .leaflet-pane,
+    .leaflet-top,
+    .leaflet-bottom {
+        z-index: 10 !important;
+    }
+}
