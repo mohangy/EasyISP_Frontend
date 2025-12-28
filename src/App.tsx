@@ -4,6 +4,7 @@ import { MainLayout } from "./components/layout/MainLayout";
 import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 import { PermissionRoute } from "./components/layout/PermissionRoute";
 import { Login } from "./features/auth/Login";
+import { Register } from "./features/auth/Register";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { PPPoECustomers } from "./features/customers/PPPoECustomers";
 import { PPPoEUserDetails } from "./features/customers/PPPoEUserDetails";
@@ -25,6 +26,7 @@ import { FinanceDashboard } from "./features/finance/FinanceDashboard";
 import { Income } from "./features/finance/Income";
 import { Expenses } from "./features/finance/Expenses";
 import { Reports } from "./features/finance/Reports";
+import { SuperAdminDashboard } from "./features/superAdmin/SuperAdminDashboard";
 import { PERMISSIONS } from "./lib/permissions";
 
 function App() {
@@ -33,6 +35,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
           <Route element={<ProtectedRoute />}>
@@ -156,6 +159,9 @@ function App() {
                   <Reports />
                 </PermissionRoute>
               } />
+
+              {/* Super Admin */}
+              <Route path="/super-admin" element={<SuperAdminDashboard />} />
 
               {/* Add other routes here */}
               <Route path="*" element={<div className="p-4">Page Not Found</div>} />

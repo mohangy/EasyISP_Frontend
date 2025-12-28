@@ -3,7 +3,8 @@ import { useAuthStore } from "../../store/authStore";
 import { useNavigate, Link } from "react-router-dom";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
-import { Wifi, Eye, EyeOff, Building2, Mail, Lock } from "lucide-react";
+import { Wifi, Eye, EyeOff, Building2, Mail, Lock, User, Phone, CheckCircle2 } from "lucide-react";
+import { authApi } from "../../services/authService";
 
 export function Register() {
     const [formData, setFormData] = useState({
@@ -11,34 +12,99 @@ export function Register() {
         email: "",
         password: "",
         confirmPassword: "",
+        businessName: "",
+        phone: "",
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
     const login = useAuthStore((state) => state.login);
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.id]: e.target.value });
+        const { id, value } = e.target;
+        setFormData({ ...formData, [id]: value });
+        // Clear field-specific error on change
+        if (validationErrors[id]) {
+            setValidationErrors({ ...validationErrors, [id]: "" });
+        }
+        if (error) setError("");
+    };
+
+    const validateForm = (): boolean => {
+        const errors: Record<string, string> = {};
+
+        // Name validation
+        if (formData.name.trim().length < 2) {
+            errors.name = "Name must be at least 2 characters";
+        }
+
+        // Business name validation
+        if (formData.businessName.trim().length < 2) {
+            errors.businessName = "Business name must be at least 2 characters";
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            errors.email = "Please enter a valid email address";
+        }
+
+        // Password validation
+        if (formData.password.length < 6) {
+            errors.password = "Password must be at least 6 characters";
+        }
+
+        // Password strength check
+        const hasUpperCase = /[A-Z]/.test(formData.password);
+        const hasLowerCase = /[a-z]/.test(formData.password);
+        const hasNumber = /[0-9]/.test(formData.password);
+
+        if (formData.password.length >= 6 && (!hasUpperCase || !hasLowerCase || !hasNumber)) {
+            errors.password = "Password should contain uppercase, lowercase, and numbers";
+        }
+
+        // Confirm password validation
+        if (formData.password !== formData.confirmPassword) {
+            errors.confirmPassword = "Passwords do not match";
+        }
+
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
+
+        if (!validateForm()) {
+            return;
+        }
+
         setIsLoading(true);
-        setTimeout(() => {
-            login(
-                {
-                    id: "2",
-                    email: formData.email,
-                    name: formData.name,
-                    role: "ADMIN",
-                    tenantId: "tenant-new",
-                },
-                "mock-token-new"
-            );
+        try {
+            const response = await authApi.register({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                businessName: formData.businessName,
+                phone: formData.phone || undefined,
+            });
+
+            login(response.user, response.token);
             navigate("/dashboard");
+        } catch (error: any) {
+            console.error("Registration failed:", error);
+            const errorMessage = error.response?.data?.message ||
+                error.response?.data?.error ||
+                "Registration failed. Please try again.";
+            setError(errorMessage);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -66,26 +132,72 @@ export function Register() {
                             </p>
                         </div>
 
-                        <form className="space-y-5" onSubmit={handleSubmit}>
-                            <Input
-                                id="name"
-                                label="Company Name"
-                                type="text"
-                                required
-                                placeholder="Your ISP Company"
-                                value={formData.name}
-                                onChange={handleChange}
-                            />
+                        {/* General Error Message */}
+                        {error && (
+                            <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                            </div>
+                        )}
 
-                            <Input
-                                id="email"
-                                label="Email address"
-                                type="email"
-                                required
-                                placeholder="admin@yourcompany.com"
-                                value={formData.email}
-                                onChange={handleChange}
-                            />
+                        <form className="space-y-5" onSubmit={handleSubmit}>
+                            <div>
+                                <Input
+                                    id="name"
+                                    label="Your Name"
+                                    type="text"
+                                    required
+                                    placeholder="John Doe"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                />
+                                {validationErrors.name && (
+                                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{validationErrors.name}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <Input
+                                    id="businessName"
+                                    label="Business Name"
+                                    type="text"
+                                    required
+                                    placeholder="Your ISP Company"
+                                    value={formData.businessName}
+                                    onChange={handleChange}
+                                />
+                                {validationErrors.businessName && (
+                                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{validationErrors.businessName}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <Input
+                                    id="email"
+                                    label="Email address"
+                                    type="email"
+                                    required
+                                    placeholder="admin@yourcompany.com"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                />
+                                {validationErrors.email && (
+                                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{validationErrors.email}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <Input
+                                    id="phone"
+                                    label="Phone Number (Optional)"
+                                    type="tel"
+                                    placeholder="+254712345678"
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                />
+                                {validationErrors.phone && (
+                                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{validationErrors.phone}</p>
+                                )}
+                            </div>
 
                             <div className="relative">
                                 <Input
@@ -104,20 +216,51 @@ export function Register() {
                                 >
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
+                                {validationErrors.password && (
+                                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{validationErrors.password}</p>
+                                )}
+                                {formData.password && !validationErrors.password && (
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                        <p className="text-xs text-green-600 dark:text-green-400">Password strength: Good</p>
+                                    </div>
+                                )}
                             </div>
 
-                            <Input
-                                id="confirmPassword"
-                                label="Confirm Password"
-                                type="password"
-                                required
-                                placeholder="Confirm your password"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="confirmPassword"
+                                    label="Confirm Password"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    required
+                                    placeholder="Confirm your password"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                >
+                                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                                {validationErrors.confirmPassword && (
+                                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{validationErrors.confirmPassword}</p>
+                                )}
+                                {formData.confirmPassword && formData.password === formData.confirmPassword && (
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                        <p className="text-xs text-green-600 dark:text-green-400">Passwords match</p>
+                                    </div>
+                                )}
+                            </div>
 
                             <div className="flex items-start gap-2">
-                                <input type="checkbox" required className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                                <input
+                                    type="checkbox"
+                                    required
+                                    className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                />
                                 <span className="text-sm text-slate-600 dark:text-slate-300">
                                     I agree to the{" "}
                                     <a href="#" className="text-blue-600 hover:underline">Terms of Service</a>
