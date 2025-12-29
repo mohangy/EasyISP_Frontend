@@ -13,7 +13,8 @@ import {
     Activity,
     Clock,
     Shield,
-    MapPinned
+    MapPinned,
+    Ban
 } from "lucide-react";
 import { customerApi, type CustomerDetails, type MpesaTransaction, type ManualRechargeTransaction } from "../../services/customerService";
 import { PERMISSIONS } from "../../lib/permissions";
@@ -48,7 +49,6 @@ export function PPPoEUserDetails() {
         setTrxPage(1);
     }, [activeTab]);
 
-    // Modal states
     const [showEditModal, setShowEditModal] = useState(false);
     const [showAddChildModal, setShowAddChildModal] = useState(false);
     const [showSMSModal, setShowSMSModal] = useState(false);
@@ -58,6 +58,21 @@ export function PPPoEUserDetails() {
     const [showChangeExpiryModal, setShowChangeExpiryModal] = useState(false);
     const [showResolveModal, setShowResolveModal] = useState(false);
     const [showChangePlanModal, setShowChangePlanModal] = useState(false);
+    const [showSuspendModal, setShowSuspendModal] = useState(false);
+    // MikroTik feature modals
+    const [showLockMACModal, setShowLockMACModal] = useState(false);
+    const [showOverridePlanModal, setShowOverridePlanModal] = useState(false);
+    const [showSpeedBoostModal, setShowSpeedBoostModal] = useState(false);
+    const [showStaticIPModal, setShowStaticIPModal] = useState(false);
+    const [showSendMessageModal, setShowSendMessageModal] = useState(false);
+
+    // Live status from MikroTik
+    const [liveStatus, setLiveStatus] = useState<{
+        isOnline: boolean;
+        ipAddress?: string;
+        macAddress?: string;
+        uptime?: string;
+    } | null>(null);
 
 
     useEffect(() => {
@@ -186,12 +201,88 @@ export function PPPoEUserDetails() {
     const handleChangeExpiry = async (newExpiry: string) => {
         if (!id) return;
         try {
-            await customerApi.updateCustomer(id, { expiresAt: newExpiry });
+            await customerApi.changeExpiry(id, newExpiry);
             toast.success("Expiry date updated successfully");
             const data = await customerApi.getCustomerDetails(id);
             setUser(data);
         } catch {
             toast.error("Failed to update expiry");
+        }
+    };
+
+    const handleSuspend = async () => {
+        if (!id) return;
+        try {
+            await customerApi.suspendCustomer(id);
+            toast.success("Customer suspended successfully");
+            const data = await customerApi.getCustomerDetails(id);
+            setUser(data);
+        } catch {
+            toast.error("Failed to suspend customer");
+        }
+    };
+
+    // ==================== MikroTik Feature Handlers ====================
+
+    const fetchLiveStatus = async () => {
+        if (!id) return;
+        try {
+            const status = await customerApi.getLiveStatus(id);
+            setLiveStatus(status);
+        } catch {
+            setLiveStatus(null);
+        }
+    };
+
+    const handleLockMAC = async () => {
+        if (!id) return;
+        try {
+            const result = await customerApi.lockMAC(id);
+            toast.success(`MAC locked: ${result.macAddress}`);
+            fetchLiveStatus();
+        } catch {
+            toast.error("Failed to lock MAC address");
+        }
+    };
+
+    const handleOverridePlan = async (downloadMbps: number, uploadMbps: number) => {
+        if (!id) return;
+        try {
+            await customerApi.overridePlan(id, downloadMbps, uploadMbps);
+            toast.success(`Bandwidth set to ${downloadMbps}M down / ${uploadMbps}M up`);
+        } catch {
+            toast.error("Failed to override bandwidth");
+        }
+    };
+
+    const handleSpeedBoost = async (downloadMbps: number, uploadMbps: number, durationMinutes: number) => {
+        if (!id) return;
+        try {
+            await customerApi.speedBoost(id, downloadMbps, uploadMbps, durationMinutes);
+            toast.success(`Speed boosted for ${durationMinutes} minutes`);
+        } catch {
+            toast.error("Failed to apply speed boost");
+        }
+    };
+
+    const handleAssignStaticIP = async (ipAddress: string) => {
+        if (!id) return;
+        try {
+            await customerApi.assignStaticIp(id, ipAddress);
+            toast.success(`Static IP ${ipAddress} assigned`);
+            fetchLiveStatus();
+        } catch {
+            toast.error("Failed to assign static IP");
+        }
+    };
+
+    const handleSendMessage = async (message: string) => {
+        if (!id) return;
+        try {
+            await customerApi.sendMessageToUser(id, message);
+            toast.success("Message sent");
+        } catch {
+            toast.error("Failed to send message");
         }
     };
 
@@ -369,6 +460,16 @@ export function PPPoEUserDetails() {
                             <Trash2 className="w-3.5 h-3.5" />
                             Delete
                         </ProtectedButton>
+                        {user.status !== 'SUSPENDED' && (
+                            <ProtectedButton
+                                permission={PERMISSIONS.CUSTOMERS_EDIT}
+                                onClick={() => setShowSuspendModal(true)}
+                                className="py-2 px-3 bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                            >
+                                <Ban className="w-3.5 h-3.5" />
+                                Suspend
+                            </ProtectedButton>
+                        )}
                     </div>
                 </div>
 
@@ -442,23 +543,55 @@ export function PPPoEUserDetails() {
                             </div>
 
                             {/* Connection Actions */}
-                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/50 flex flex-wrap justify-center gap-2">
-                                <ProtectedButton
-                                    permission={PERMISSIONS.CUSTOMERS_EDIT}
-                                    onClick={() => setShowResetMACModal(true)}
-                                    className="py-2 px-3 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/20 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <RefreshCw className="w-3.5 h-3.5" />
-                                    Reset MAC
-                                </ProtectedButton>
-                                <ProtectedButton
-                                    permission={PERMISSIONS.CUSTOMERS_EDIT}
-                                    onClick={() => setShowPurgeModal(true)}
-                                    className="py-2 px-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <Shield className="w-3.5 h-3.5" />
-                                    Purge
-                                </ProtectedButton>
+                            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/50 space-y-2">
+                                <div className="flex flex-wrap justify-center gap-2">
+                                    <ProtectedButton
+                                        permission={PERMISSIONS.CUSTOMERS_EDIT}
+                                        onClick={() => setShowResetMACModal(true)}
+                                        className="py-2 px-3 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/20 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <RefreshCw className="w-3.5 h-3.5" />
+                                        Reset MAC
+                                    </ProtectedButton>
+                                    <ProtectedButton
+                                        permission={PERMISSIONS.CUSTOMERS_EDIT}
+                                        onClick={() => setShowLockMACModal(true)}
+                                        className="py-2 px-3 bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-500/20 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        Lock MAC
+                                    </ProtectedButton>
+                                    <ProtectedButton
+                                        permission={PERMISSIONS.CUSTOMERS_EDIT}
+                                        onClick={() => setShowPurgeModal(true)}
+                                        className="py-2 px-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <Shield className="w-3.5 h-3.5" />
+                                        Purge
+                                    </ProtectedButton>
+                                </div>
+                                <div className="flex flex-wrap justify-center gap-2">
+                                    <ProtectedButton
+                                        permission={PERMISSIONS.CUSTOMERS_EDIT}
+                                        onClick={() => setShowOverridePlanModal(true)}
+                                        className="py-1.5 px-2.5 bg-teal-500/10 text-teal-600 dark:text-teal-400 hover:bg-teal-500/20 rounded-lg text-xs font-medium transition-colors"
+                                    >
+                                        Override Plan
+                                    </ProtectedButton>
+                                    <ProtectedButton
+                                        permission={PERMISSIONS.CUSTOMERS_EDIT}
+                                        onClick={() => setShowSpeedBoostModal(true)}
+                                        className="py-1.5 px-2.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 rounded-lg text-xs font-medium transition-colors"
+                                    >
+                                        Speed Boost
+                                    </ProtectedButton>
+                                    <ProtectedButton
+                                        permission={PERMISSIONS.CUSTOMERS_EDIT}
+                                        onClick={() => setShowStaticIPModal(true)}
+                                        className="py-1.5 px-2.5 bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 rounded-lg text-xs font-medium transition-colors"
+                                    >
+                                        Static IP
+                                    </ProtectedButton>
+                                </div>
                             </div>
                         </div>
 
@@ -758,6 +891,123 @@ export function PPPoEUserDetails() {
                 currentPackageName={user?.package?.name}
                 onSelect={handleChangePackage}
             />
+
+            <ConfirmModal
+                isOpen={showSuspendModal}
+                onClose={() => setShowSuspendModal(false)}
+                onConfirm={handleSuspend}
+                title="Suspend Customer"
+                message="Are you sure you want to suspend this customer? They will not be able to connect until reactivated."
+                confirmText="Suspend"
+                confirmColor="amber"
+                icon={ModalIcons.Delete}
+            />
+
+            {/* Lock MAC Modal */}
+            <ConfirmModal
+                isOpen={showLockMACModal}
+                onClose={() => setShowLockMACModal(false)}
+                onConfirm={handleLockMAC}
+                title="Lock MAC Address"
+                message="This will bind the customer's current MAC address to their account. They will only be able to connect from this device."
+                confirmText="Lock MAC"
+                confirmColor="cyan"
+                icon={ModalIcons.ResetMAC}
+            />
+
+            {/* Override Plan Modal */}
+            {showOverridePlanModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md mx-4">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Override Bandwidth</h3>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const form = e.target as HTMLFormElement;
+                            const down = parseInt(form.download.value);
+                            const up = parseInt(form.upload.value);
+                            handleOverridePlan(down, up);
+                            setShowOverridePlanModal(false);
+                        }}>
+                            <div className="space-y-3 mb-4">
+                                <div>
+                                    <label className="text-sm text-slate-600 dark:text-slate-400">Download (Mbps)</label>
+                                    <input name="download" type="number" min="1" max="1000" defaultValue="50" required className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-slate-600 dark:text-slate-400">Upload (Mbps)</label>
+                                    <input name="upload" type="number" min="1" max="1000" defaultValue="25" required className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                                </div>
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                                <button type="button" onClick={() => setShowOverridePlanModal(false)} className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600">Apply</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Speed Boost Modal */}
+            {showSpeedBoostModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md mx-4">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Temporary Speed Boost</h3>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const form = e.target as HTMLFormElement;
+                            const down = parseInt(form.download.value);
+                            const up = parseInt(form.upload.value);
+                            const duration = parseInt(form.duration.value);
+                            handleSpeedBoost(down, up, duration);
+                            setShowSpeedBoostModal(false);
+                        }}>
+                            <div className="space-y-3 mb-4">
+                                <div>
+                                    <label className="text-sm text-slate-600 dark:text-slate-400">Download (Mbps)</label>
+                                    <input name="download" type="number" min="1" max="1000" defaultValue="100" required className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-slate-600 dark:text-slate-400">Upload (Mbps)</label>
+                                    <input name="upload" type="number" min="1" max="1000" defaultValue="50" required className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-slate-600 dark:text-slate-400">Duration (minutes)</label>
+                                    <input name="duration" type="number" min="1" max="1440" defaultValue="60" required className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                                </div>
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                                <button type="button" onClick={() => setShowSpeedBoostModal(false)} className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600">Apply Boost</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Static IP Modal */}
+            {showStaticIPModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 w-full max-w-md mx-4">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Assign Static IP</h3>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const form = e.target as HTMLFormElement;
+                            const ip = form.ipAddress.value;
+                            handleAssignStaticIP(ip);
+                            setShowStaticIPModal(false);
+                        }}>
+                            <div className="mb-4">
+                                <label className="text-sm text-slate-600 dark:text-slate-400">IP Address</label>
+                                <input name="ipAddress" type="text" pattern="^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$" placeholder="192.168.1.100" required className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white" />
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                                <button type="button" onClick={() => setShowStaticIPModal(false)} className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600">Assign IP</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

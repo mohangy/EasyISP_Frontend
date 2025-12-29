@@ -1,7 +1,7 @@
 # Frontend API Requirements
 
 > **Generated:** December 25, 2025  
-> **Last Updated:** December 25, 2025  
+> **Last Updated:** December 29, 2025  
 > **Purpose:** Document all backend API endpoints required by the EasyISP Frontend
 
 ---
@@ -30,6 +30,7 @@
 | 2025-12-26 | Added NAS/Router CRUD endpoints with test connection, config generation |
 | 2025-12-27 | Added Finance module endpoints (Income, Expenses, Stats) |
 | 2025-12-27 | Added Vouchers, SMS, Payments, and Customer Actions endpoints (100% coverage) |
+| 2025-12-29 | Added MikroTik integration endpoints (Lock MAC, Live Status, Override Plan, Speed Boost, Static IP, Bandwidth) |
 
 ---
 
@@ -671,6 +672,295 @@ Update customer details.
 
 ### `DELETE /api/customers/:id`
 Delete a customer.
+
+---
+
+## MikroTik Integration Endpoints
+
+> **Service File:** `src/services/customerService.ts`
+
+These endpoints interact with MikroTik routers via the backend's MikroTik API service.
+
+### `POST /api/customers/:id/mac-lock`
+Lock customer's current MAC address to their account.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "MAC address locked",
+  "macAddress": "AA:BB:CC:DD:EE:FF"
+}
+```
+
+---
+
+### `GET /api/customers/:id/live-status`
+Get real-time status from MikroTik router.
+
+**Response (Online):**
+```json
+{
+  "isOnline": true,
+  "ipAddress": "192.168.1.100",
+  "macAddress": "AA:BB:CC:DD:EE:FF",
+  "uptime": "2h30m15s",
+  "sessionId": "abc123"
+}
+```
+
+**Response (Offline):**
+```json
+{
+  "isOnline": false,
+  "lastSeenAgo": "5m ago",
+  "lastIp": "192.168.1.100",
+  "lastMac": "AA:BB:CC:DD:EE:FF"
+}
+```
+
+---
+
+### `POST /api/customers/:id/override-plan`
+Apply custom bandwidth without disconnecting the user.
+
+**Request Body:**
+```json
+{
+  "downloadMbps": 50,
+  "uploadMbps": 25
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Bandwidth set to 50M down / 25M up"
+}
+```
+
+---
+
+### `POST /api/customers/:id/speed-boost`
+Temporary speed increase that reverts automatically.
+
+**Request Body:**
+```json
+{
+  "downloadMbps": 100,
+  "uploadMbps": 50,
+  "durationMinutes": 60
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Speed boosted to 100M down / 50M up for 60 minutes"
+}
+```
+
+---
+
+### `POST /api/customers/:id/assign-ip`
+Assign a static IP address to a customer.
+
+**Request Body:**
+```json
+{
+  "ipAddress": "192.168.1.100"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Static IP 192.168.1.100 assigned"
+}
+```
+
+---
+
+### `GET /api/customers/:id/bandwidth`
+Get live bandwidth usage for connected user.
+
+**Response (Online):**
+```json
+{
+  "online": true,
+  "downloadBps": 1250000,
+  "uploadBps": 312500,
+  "downloadMbps": "10.00",
+  "uploadMbps": "2.50"
+}
+```
+
+**Response (Offline):**
+```json
+{
+  "online": false,
+  "message": "User is not currently connected"
+}
+```
+
+---
+
+### `POST /api/customers/:id/send-message`
+Send a message to a connected PPPoE user.
+
+**Request Body:**
+```json
+{
+  "message": "Your subscription expires in 3 days"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Message sent"
+}
+```
+
+---
+
+## Hotspot Portal Endpoints
+
+> **Service File:** `src/services/portalService.ts` (if applicable)
+
+These endpoints power the captive portal for Hotspot users. They do NOT require authentication headers - tenant is identified via query parameter or session.
+
+### `GET /api/portal/packages`
+List available packages for purchase/display on the portal.
+
+**Query Parameters:**
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `tenantId` | string | ✅ | Tenant identifier |
+
+**Response:**
+```json
+{
+  "packages": [
+    {
+      "id": "uuid",
+      "name": "1 Day - 5GB",
+      "price": 50,
+      "duration": 1440,
+      "dataLimit": 5368709120
+    }
+  ]
+}
+```
+
+---
+
+### `POST /api/portal/login`
+Authenticate and connect a hotspot user.
+
+**Request Body:**
+```json
+{
+  "username": "string",
+  "password": "string",
+  "nasId": "string",
+  "mac": "AA:BB:CC:DD:EE:FF",
+  "ip": "10.0.0.50"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Connected successfully",
+  "redirectUrl": "http://www.google.com"
+}
+```
+
+---
+
+### `POST /api/portal/logout`
+Disconnect a hotspot user session.
+
+**Request Body:**
+```json
+{
+  "sessionId": "string"
+}
+```
+
+---
+
+### `GET /api/portal/status`
+Get current session status for a hotspot user.
+
+**Query Parameters:**
+| Param | Type | Description |
+|-------|------|-------------|
+| `mac` | string | User's MAC address |
+| `nasId` | string | Router ID |
+
+**Response:**
+```json
+{
+  "isOnline": true,
+  "username": "guest123",
+  "bytesUsed": 1234567890,
+  "bytesLimit": 5368709120,
+  "timeUsed": 3600,
+  "timeLimit": 86400,
+  "expiresAt": "2025-12-30T12:00:00Z"
+}
+```
+
+---
+
+### `POST /api/portal/voucher`
+Redeem a voucher code on the portal.
+
+**Request Body:**
+```json
+{
+  "code": "ABC123DEF",
+  "mac": "AA:BB:CC:DD:EE:FF",
+  "nasId": "uuid"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Voucher redeemed",
+  "package": "1 Day - 5GB",
+  "expiresAt": "2025-12-30T12:00:00Z"
+}
+```
+
+---
+
+### `GET /api/portal/tenant`
+Get tenant branding info for portal customization.
+
+**Query Parameters:**
+| Param | Type | Description |
+|-------|------|-------------|
+| `tenantId` | string | Tenant identifier |
+
+**Response:**
+```json
+{
+  "businessName": "Sunshine ISP",
+  "logo": "https://storage.example.com/logo.png",
+  "primaryColor": "#3B82F6",
+  "supportPhone": "+254712345678"
+}
+```
 
 ---
 

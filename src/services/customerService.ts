@@ -195,12 +195,12 @@ export const customerApi = {
 
     // Reset customer MAC address
     resetMAC: async (id: string): Promise<void> => {
-        await api.post(`/customers/${id}/reset-mac`);
+        await api.post(`/customers/${id}/mac-reset`);
     },
 
     // Purge/disconnect active session
     purgeSession: async (id: string): Promise<void> => {
-        await api.post(`/customers/${id}/purge`);
+        await api.post(`/customers/${id}/disconnect`);
     },
 
     // Disconnect user (CoA disconnect)
@@ -208,26 +208,96 @@ export const customerApi = {
         await api.post(`/customers/${id}/disconnect`);
     },
 
-    // Send SMS to customer
+    // Send SMS to customer (via SMS routes)
     sendSMS: async (id: string, message: string): Promise<void> => {
-        await api.post(`/customers/${id}/sms`, { message });
+        // Get customer phone first, then send via SMS API
+        const customer = await customerApi.getCustomer(id);
+        if (!customer.phone) throw new Error('Customer has no phone number');
+        await api.post('/sms/send', { phone: customer.phone, message });
     },
 
-    // Extend customer expiry
-    extendExpiry: async (id: string, days: number): Promise<Customer> => {
-        const response = await api.post<Customer>(`/customers/${id}/extend`, { days });
-        return response.data;
+    // Change customer expiry date
+    changeExpiry: async (id: string, expiresAt: string): Promise<void> => {
+        await api.put(`/customers/${id}/expiry`, { expiresAt });
     },
 
     // Change customer package
     changePackage: async (id: string, packageId: string): Promise<Customer> => {
-        const response = await api.post<Customer>(`/customers/${id}/change-package`, { packageId });
+        const response = await api.put<Customer>(`/customers/${id}/package`, { packageId });
         return response.data;
     },
 
-    // Resolve pending transaction
-    resolveTransaction: async (customerId: string, transactionId: string): Promise<void> => {
-        await api.post(`/customers/${customerId}/transactions/${transactionId}/resolve`);
+    // Resolve pending transaction (recharge customer with manual payment)
+    resolveTransaction: async (customerId: string, mpesaCode: string): Promise<void> => {
+        // This will do a manual recharge with the mpesa code as reference
+        await api.post(`/customers/${customerId}/recharge`, {
+            amount: 0, // Amount should be provided by the modal
+            description: `Resolved transaction: ${mpesaCode}`
+        });
+    },
+
+    // Suspend customer account
+    suspendCustomer: async (id: string): Promise<void> => {
+        await api.post(`/customers/${id}/suspend`);
+    },
+
+    // Activate customer account
+    activateCustomer: async (id: string): Promise<void> => {
+        await api.post(`/customers/${id}/activate`);
+    },
+
+    // ==================== MikroTik API Methods ====================
+
+    // Lock customer MAC address
+    lockMAC: async (id: string): Promise<{ macAddress: string }> => {
+        const response = await api.post<{ success: boolean; macAddress: string }>(`/customers/${id}/mac-lock`);
+        return response.data;
+    },
+
+    // Get live status from MikroTik
+    getLiveStatus: async (id: string): Promise<{
+        isOnline: boolean;
+        ipAddress?: string;
+        macAddress?: string;
+        uptime?: string;
+        sessionId?: string;
+        lastSeenAgo?: string;
+        error?: string;
+    }> => {
+        const response = await api.get(`/customers/${id}/live-status`);
+        return response.data;
+    },
+
+    // Override plan (custom bandwidth)
+    overridePlan: async (id: string, downloadMbps: number, uploadMbps: number): Promise<void> => {
+        await api.post(`/customers/${id}/override-plan`, { downloadMbps, uploadMbps });
+    },
+
+    // Temporary speed boost
+    speedBoost: async (id: string, downloadMbps: number, uploadMbps: number, durationMinutes: number): Promise<void> => {
+        await api.post(`/customers/${id}/speed-boost`, { downloadMbps, uploadMbps, durationMinutes });
+    },
+
+    // Assign static IP
+    assignStaticIp: async (id: string, ipAddress: string): Promise<void> => {
+        await api.post(`/customers/${id}/assign-ip`, { ipAddress });
+    },
+
+    // Get live bandwidth stats
+    getBandwidth: async (id: string): Promise<{
+        online: boolean;
+        downloadBps?: number;
+        uploadBps?: number;
+        downloadMbps?: string;
+        uploadMbps?: string;
+    }> => {
+        const response = await api.get(`/customers/${id}/bandwidth`);
+        return response.data;
+    },
+
+    // Send message to connected user
+    sendMessageToUser: async (id: string, message: string): Promise<void> => {
+        await api.post(`/customers/${id}/send-message`, { message });
     },
 
     // Get available packages for selection

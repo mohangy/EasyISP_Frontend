@@ -18,7 +18,7 @@ interface Transaction {
 export function Transactions() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState(\"\");
+    const [searchQuery, setSearchQuery] = useState("");
     const [typeFilter, setTypeFilter] = useState<'all' | 'credit' | 'debit'>('all');
 
     useEffect(() => {
