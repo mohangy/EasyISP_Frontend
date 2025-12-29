@@ -58,7 +58,7 @@ export function Packages() {
                     </h1>
                     <p className="text-slate-400 text-sm mt-1">Overview of All Hotspot and PPPoE Packages</p>
                 </div>
-                <PermissionGate permission={PERMISSIONS.PACKAGES_CREATE}>
+                <PermissionGate permission={PERMISSIONS.PACKAGES_ADD_PPPOE}>
                     <div className="flex flex-wrap gap-3 justify-center md:justify-end">
                         <button
                             onClick={() => setShowHotspotModal(true)}

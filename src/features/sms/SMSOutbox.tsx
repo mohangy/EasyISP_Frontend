@@ -124,7 +124,7 @@ export function SMSOutbox() {
     };
 
     const handleClearAll = () => {
-        if (can(PERMISSIONS.SMS_DELETE)) {
+        if (can(PERMISSIONS.SMS_CLEAR)) {
             setShowClearModal(true);
         } else {
             toast.error("You do not have permission to clear SMS logs");
@@ -148,10 +148,10 @@ export function SMSOutbox() {
     };
 
     const handleCompose = () => {
-        if (can(PERMISSIONS.SMS_SEND)) {
+        if (can(PERMISSIONS.SMS_COMPOSE)) {
             setShowComposeModal(true);
         } else {
-            toast.error("You do not have permission to send SMS");
+            toast.error("You do not have permission to compose SMS");
         }
     };
 

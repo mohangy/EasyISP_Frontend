@@ -51,22 +51,22 @@ function App() {
 
               {/* Customer Routes */}
               <Route path="/customers/pppoe" element={
-                <PermissionRoute permission={PERMISSIONS.CUSTOMERS_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.PPPOE_VIEW}>
                   <PPPoECustomers />
                 </PermissionRoute>
               } />
               <Route path="/customers/pppoe/:id" element={
-                <PermissionRoute permission={PERMISSIONS.CUSTOMERS_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.PPPOE_DETAILS_VIEW}>
                   <PPPoEUserDetails />
                 </PermissionRoute>
               } />
               <Route path="/customers/hotspot" element={
-                <PermissionRoute permission={PERMISSIONS.CUSTOMERS_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.HOTSPOT_VIEW}>
                   <HotspotCustomers />
                 </PermissionRoute>
               } />
               <Route path="/customers/hotspot/:id" element={
-                <PermissionRoute permission={PERMISSIONS.CUSTOMERS_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.HOTSPOT_DETAILS_VIEW}>
                   <HotspotUserDetails />
                 </PermissionRoute>
               } />
@@ -85,14 +85,14 @@ function App() {
                 </PermissionRoute>
               } />
               <Route path="/operators/:id" element={
-                <PermissionRoute permission={PERMISSIONS.OPERATORS_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.OPERATORS_DETAILS_VIEW}>
                   <OperatorDetails />
                 </PermissionRoute>
               } />
 
               {/* Map */}
               <Route path="/map" element={
-                <PermissionRoute permission={PERMISSIONS.DASHBOARD_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.MAPS_VIEW}>
                   <CustomerMap />
                 </PermissionRoute>
               } />
@@ -104,7 +104,7 @@ function App() {
                 </PermissionRoute>
               } />
               <Route path="/packages/:id" element={
-                <PermissionRoute permission={PERMISSIONS.PACKAGES_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.PACKAGES_DETAILS_VIEW}>
                   <PackageDetails />
                 </PermissionRoute>
               } />
@@ -116,19 +116,19 @@ function App() {
                 </PermissionRoute>
               } />
               <Route path="/nas/:id" element={
-                <PermissionRoute permission={PERMISSIONS.ROUTERS_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.ROUTERS_DETAILS_VIEW}>
                   <RouterDetails />
                 </PermissionRoute>
               } />
 
               {/* Payments */}
               <Route path="/payments/electronic" element={
-                <PermissionRoute permission={PERMISSIONS.PAYMENTS_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.PAYMENTS_VIEW_ELECTRONIC}>
                   <ElectronicPayments />
                 </PermissionRoute>
               } />
               <Route path="/payments/manual" element={
-                <PermissionRoute permission={PERMISSIONS.PAYMENTS_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.PAYMENTS_VIEW_MANUAL}>
                   <ManualPayments />
                 </PermissionRoute>
               } />
@@ -147,22 +147,22 @@ function App() {
 
               {/* Finance */}
               <Route path="/finance" element={
-                <PermissionRoute permission={PERMISSIONS.FINANCE_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.FINANCE_DASHBOARD_VIEW}>
                   <FinanceDashboard />
                 </PermissionRoute>
               } />
               <Route path="/finance/income" element={
-                <PermissionRoute permission={PERMISSIONS.FINANCE_VIEW}>
+                <PermissionRoute permission={PERMISSIONS.FINANCE_INCOME_VIEW}>
                   <Income />
                 </PermissionRoute>
               } />
               <Route path="/finance/expenses" element={
-                <PermissionRoute permission={PERMISSIONS.FINANCE_EXPENSES}>
+                <PermissionRoute permission={PERMISSIONS.FINANCE_EXPENSES_VIEW}>
                   <Expenses />
                 </PermissionRoute>
               } />
               <Route path="/finance/reports" element={
-                <PermissionRoute permission={PERMISSIONS.FINANCE_REPORTS}>
+                <PermissionRoute permission={PERMISSIONS.FINANCE_REPORTS_VIEW}>
                   <Reports />
                 </PermissionRoute>
               } />

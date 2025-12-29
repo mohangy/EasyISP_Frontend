@@ -730,7 +730,7 @@ export function CustomerMap() {
                                                 : "-"}
                                         </span>
                                     </div>
-                                    {can(PERMISSIONS.CUSTOMERS_VIEW) && (
+                                    {can(PERMISSIONS.PPPOE_DETAILS_VIEW) && (
                                         <div className="flex items-center justify-end mt-2 pt-2 border-t border-slate-700/50">
                                             <button
                                                 onClick={() => refreshCustomer((selectedItem as Customer).id)}

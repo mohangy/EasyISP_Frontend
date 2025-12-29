@@ -185,7 +185,7 @@ export function Operators() {
                         </p>
                     </div>
                     <ProtectedButton
-                        permission={PERMISSIONS.OPERATORS_CREATE}
+                        permission={PERMISSIONS.OPERATORS_ADD}
                         onClick={handleOpenAdd}
                         className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 text-white rounded-xl font-medium shadow-lg shadow-cyan-600/20 hover:shadow-xl hover:shadow-cyan-600/30 transition-all hover:bg-cyan-700"
                     >

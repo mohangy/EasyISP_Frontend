@@ -577,19 +577,19 @@ export function PPPoECustomers() {
                 </div>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => can(PERMISSIONS.SMS_SEND) && setShowBulkSmsModal(true)}
-                        className={`flex items-center gap-2 px-4 py-2 border border-slate-600 text-slate-200 rounded-lg transition-all text-sm ${can(PERMISSIONS.SMS_SEND) ? 'hover:bg-slate-700' : 'opacity-50 cursor-not-allowed'}`}
-                        disabled={!can(PERMISSIONS.SMS_SEND)}
-                        title={!can(PERMISSIONS.SMS_SEND) ? "You don't have permission to send SMS" : undefined}
+                        onClick={() => can(PERMISSIONS.PPPOE_SEND_BULK_SMS) && setShowBulkSmsModal(true)}
+                        className={`flex items-center gap-2 px-4 py-2 border border-slate-600 text-slate-200 rounded-lg transition-all text-sm ${can(PERMISSIONS.PPPOE_SEND_BULK_SMS) ? 'hover:bg-slate-700' : 'opacity-50 cursor-not-allowed'}`}
+                        disabled={!can(PERMISSIONS.PPPOE_SEND_BULK_SMS)}
+                        title={!can(PERMISSIONS.PPPOE_SEND_BULK_SMS) ? "You don't have permission to send bulk SMS" : undefined}
                     >
                         <MessageSquare className="w-4 h-4" />
                         <span>SEND SMS TO MANY</span>
                     </button>
                     <button
-                        onClick={() => can(PERMISSIONS.CUSTOMERS_CREATE) && setShowAddModal(true)}
-                        disabled={!can(PERMISSIONS.CUSTOMERS_CREATE)}
-                        className={`flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium transition-all text-sm ${can(PERMISSIONS.CUSTOMERS_CREATE) ? 'hover:bg-blue-700' : 'opacity-50 cursor-not-allowed'}`}
-                        title={!can(PERMISSIONS.CUSTOMERS_CREATE) ? "You don't have permission to add customers" : undefined}
+                        onClick={() => can(PERMISSIONS.PPPOE_ADD_USER) && setShowAddModal(true)}
+                        disabled={!can(PERMISSIONS.PPPOE_ADD_USER)}
+                        className={`flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium transition-all text-sm ${can(PERMISSIONS.PPPOE_ADD_USER) ? 'hover:bg-blue-700' : 'opacity-50 cursor-not-allowed'}`}
+                        title={!can(PERMISSIONS.PPPOE_ADD_USER) ? "You don't have permission to add users" : undefined}
                     >
                         <Plus className="w-4 h-4" />
                         <span>ADD USER</span>

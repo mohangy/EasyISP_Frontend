@@ -2,82 +2,112 @@ import type { User, UserRole } from '../types';
 
 // ============ PERMISSION CONSTANTS ============
 export const PERMISSIONS = {
-    // Dashboard
+    // ==================== DASHBOARD ====================
     DASHBOARD_VIEW: 'dashboard:view',
-    ANALYTICS_VIEW: 'analytics:view',
+    DASHBOARD_ACTIVE_SESSIONS: 'dashboard:active_sessions',
+    DASHBOARD_TOTAL_CUSTOMERS: 'dashboard:total_customers',
+    DASHBOARD_MONTHLY_REVENUE: 'dashboard:monthly_revenue',
+    DASHBOARD_TODAY_REVENUE: 'dashboard:today_revenue',
+    DASHBOARD_NETWORK_USAGE: 'dashboard:network_usage',
+    DASHBOARD_PAYMENTS: 'dashboard:payments',
 
-    // Customers
-    CUSTOMERS_VIEW: 'customers:view',
-    CUSTOMERS_CREATE: 'customers:create',
-    CUSTOMERS_EDIT: 'customers:edit',
-    CUSTOMERS_DELETE: 'customers:delete',
-    CUSTOMERS_SUSPEND: 'customers:suspend',
+    // ==================== PPPOE ====================
+    PPPOE_VIEW: 'pppoe:view',
+    PPPOE_ADD_USER: 'pppoe:add_user',
+    PPPOE_SEND_BULK_SMS: 'pppoe:send_bulk_sms',
+    // PPPoE Details
+    PPPOE_DETAILS_VIEW: 'pppoe:details_view',
+    PPPOE_EDIT: 'pppoe:edit',
+    PPPOE_ADD_CHILD: 'pppoe:add_child',
+    PPPOE_SEND_SMS: 'pppoe:send_sms',
+    PPPOE_DELETE: 'pppoe:delete',
+    PPPOE_SUSPEND: 'pppoe:suspend',
+    PPPOE_RESET_MAC: 'pppoe:reset_mac',
+    PPPOE_LOCK_MAC: 'pppoe:lock_mac',
+    PPPOE_PURGE: 'pppoe:purge',
+    PPPOE_OVERRIDE_PLAN: 'pppoe:override_plan',
+    PPPOE_SPEED_BOOST: 'pppoe:speed_boost',
+    PPPOE_STATIC_IP: 'pppoe:static_ip',
+    PPPOE_CHANGE_PLAN: 'pppoe:change_plan',
+    PPPOE_CHANGE_EXPIRY: 'pppoe:change_expiry',
+    PPPOE_RESOLVE: 'pppoe:resolve',
 
-    // Packages
+    // ==================== HOTSPOT ====================
+    HOTSPOT_VIEW: 'hotspot:view',
+    HOTSPOT_ADD_USER: 'hotspot:add_user',
+    HOTSPOT_DELETE_EXPIRED: 'hotspot:delete_expired',
+    HOTSPOT_DELETE_UNUSED: 'hotspot:delete_unused',
+    // Hotspot Details
+    HOTSPOT_DETAILS_VIEW: 'hotspot:details_view',
+    HOTSPOT_DELETE: 'hotspot:delete',
+    HOTSPOT_RESET_MAC: 'hotspot:reset_mac',
+    HOTSPOT_PURGE: 'hotspot:purge',
+    HOTSPOT_RESET_COUNTERS: 'hotspot:reset_counters',
+    HOTSPOT_CHANGE_PACKAGE: 'hotspot:change_package',
+
+    // ==================== PAYMENTS ====================
+    PAYMENTS_VIEW_ELECTRONIC: 'payments:view_electronic',
+    PAYMENTS_VIEW_MANUAL: 'payments:view_manual',
+
+    // ==================== SMS ====================
+    SMS_VIEW: 'sms:view',
+    SMS_SETTINGS: 'sms:settings',
+    SMS_COMPOSE: 'sms:compose',
+    SMS_CLEAR: 'sms:clear',
+    // SMS Details
+    SMS_DELETE: 'sms:delete',
+    SMS_RESEND: 'sms:resend',
+
+    // ==================== MAPS ====================
+    MAPS_VIEW: 'maps:view',
+
+    // ==================== PACKAGES ====================
     PACKAGES_VIEW: 'packages:view',
-    PACKAGES_CREATE: 'packages:create',
+    PACKAGES_ADD_HOTSPOT: 'packages:add_hotspot',
+    PACKAGES_ADD_PPPOE: 'packages:add_pppoe',
+    // Package Details
+    PACKAGES_DETAILS_VIEW: 'packages:details_view',
     PACKAGES_EDIT: 'packages:edit',
     PACKAGES_DELETE: 'packages:delete',
 
-    // Routers/NAS
+    // ==================== ROUTERS ====================
     ROUTERS_VIEW: 'routers:view',
-    ROUTERS_CREATE: 'routers:create',
+    ROUTERS_ADD: 'routers:add',
+    ROUTERS_TUTORIAL: 'routers:tutorial',
+    // Router Details
+    ROUTERS_DETAILS_VIEW: 'routers:details_view',
     ROUTERS_EDIT: 'routers:edit',
     ROUTERS_DELETE: 'routers:delete',
     ROUTERS_TEST: 'routers:test',
     ROUTERS_CONFIG: 'routers:config',
     ROUTERS_DISCONNECT: 'routers:disconnect',
 
-    // Payments
-    PAYMENTS_VIEW: 'payments:view',
-    PAYMENTS_PROCESS: 'payments:process',
-    PAYMENTS_REFUND: 'payments:refund',
-    PAYMENTS_REPORTS: 'payments:reports',
+    // ==================== FINANCE ====================
+    FINANCE_DASHBOARD_VIEW: 'finance:dashboard_view',
+    FINANCE_VIEW_CHARTS: 'finance:view_charts',
+    FINANCE_INCOME_VIEW: 'finance:income_view',
+    FINANCE_INCOME_CREATE: 'finance:income_create',
+    FINANCE_EXPENSES_VIEW: 'finance:expenses_view',
+    FINANCE_EXPENSES_CREATE: 'finance:expenses_create',
+    FINANCE_REPORTS_VIEW: 'finance:reports_view',
+    FINANCE_REPORTS_GENERATE: 'finance:reports_generate',
 
-    // Vouchers
-    VOUCHERS_VIEW: 'vouchers:view',
-    VOUCHERS_GENERATE: 'vouchers:generate',
-    VOUCHERS_PRINT: 'vouchers:print',
-
-    // SMS
-    SMS_VIEW: 'sms:view',
-    SMS_SEND: 'sms:send',
-    SMS_DELETE: 'sms:delete',
-
-    // Tickets
-    TICKETS_VIEW: 'tickets:view',
-    TICKETS_CREATE: 'tickets:create',
-    TICKETS_RESPOND: 'tickets:respond',
-    TICKETS_CLOSE: 'tickets:close',
-
-    // Operators
+    // ==================== TEAM/OPERATORS ====================
     OPERATORS_VIEW: 'operators:view',
-    OPERATORS_CREATE: 'operators:create',
+    OPERATORS_ADD: 'operators:add',
+    // Operator Details
+    OPERATORS_DETAILS_VIEW: 'operators:details_view',
     OPERATORS_EDIT: 'operators:edit',
     OPERATORS_DELETE: 'operators:delete',
+    OPERATORS_MANAGE_PERMISSIONS: 'operators:manage_permissions',
 
-    // Settings
+    // ==================== SETTINGS ====================
     SETTINGS_GENERAL: 'settings:general',
     SETTINGS_LICENCE: 'settings:licence',
     SETTINGS_INVOICES: 'settings:invoices',
     SETTINGS_PAYMENT_GATEWAY: 'settings:payment_gateway',
     SETTINGS_SMS: 'settings:sms',
     SETTINGS_PASSWORD: 'settings:password',
-
-    // Finance
-    FINANCE_VIEW: 'finance:view',
-    FINANCE_DASHBOARD: 'finance:dashboard',
-    FINANCE_INCOME_CREATE: 'finance:income_create',
-    FINANCE_INVOICES: 'finance:invoices',
-    FINANCE_INVOICES_CREATE: 'finance:invoices_create',
-    FINANCE_EXPENSES: 'finance:expenses',
-    FINANCE_EXPENSES_CREATE: 'finance:expenses_create',
-    FINANCE_ACCOUNTS: 'finance:accounts',
-    FINANCE_TRANSACTIONS: 'finance:transactions',
-    FINANCE_REPORTS: 'finance:reports',
-    FINANCE_RECONCILIATION: 'finance:reconciliation',
-    FINANCE_TAX: 'finance:tax',
-    FINANCE_MPESA: 'finance:mpesa',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -89,188 +119,228 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     // Super Admin: Full access
     SUPER_ADMIN: [...ALL_PERMISSIONS],
 
-    // Admin: Full access except sensitive tenant settings
+    // Admin: Full access except sensitive settings
     ADMIN: ALL_PERMISSIONS.filter(p =>
-        !['settings:general', 'settings:licence', 'settings:payment_gateway'].includes(p)
+        !['settings:licence', 'settings:payment_gateway'].includes(p)
     ),
 
-    // Customer Care: Customer management, payments, vouchers, tickets
+    // Customer Care: Customer management focus
     CUSTOMER_CARE: [
+        // Dashboard
         PERMISSIONS.DASHBOARD_VIEW,
-        PERMISSIONS.ANALYTICS_VIEW,
-        // Customers
-        PERMISSIONS.CUSTOMERS_VIEW,
-        PERMISSIONS.CUSTOMERS_CREATE,
-        PERMISSIONS.CUSTOMERS_EDIT,
-        PERMISSIONS.CUSTOMERS_SUSPEND,
-        // Packages (view only)
-        PERMISSIONS.PACKAGES_VIEW,
-        // Routers (view only)
-        PERMISSIONS.ROUTERS_VIEW,
+        PERMISSIONS.DASHBOARD_ACTIVE_SESSIONS,
+        PERMISSIONS.DASHBOARD_TOTAL_CUSTOMERS,
+        PERMISSIONS.DASHBOARD_PAYMENTS,
+        // PPPoE
+        PERMISSIONS.PPPOE_VIEW,
+        PERMISSIONS.PPPOE_DETAILS_VIEW,
+        PERMISSIONS.PPPOE_EDIT,
+        PERMISSIONS.PPPOE_SEND_SMS,
+        PERMISSIONS.PPPOE_SEND_BULK_SMS,
+        PERMISSIONS.PPPOE_SUSPEND,
+        PERMISSIONS.PPPOE_CHANGE_EXPIRY,
+        PERMISSIONS.PPPOE_RESOLVE,
+        // Hotspot
+        PERMISSIONS.HOTSPOT_VIEW,
+        PERMISSIONS.HOTSPOT_DETAILS_VIEW,
+        PERMISSIONS.HOTSPOT_CHANGE_PACKAGE,
         // Payments
-        PERMISSIONS.PAYMENTS_VIEW,
-        PERMISSIONS.PAYMENTS_PROCESS,
-        PERMISSIONS.PAYMENTS_REPORTS,
-        // Vouchers
-        PERMISSIONS.VOUCHERS_VIEW,
-        PERMISSIONS.VOUCHERS_GENERATE,
-        PERMISSIONS.VOUCHERS_PRINT,
+        PERMISSIONS.PAYMENTS_VIEW_ELECTRONIC,
+        PERMISSIONS.PAYMENTS_VIEW_MANUAL,
         // SMS
         PERMISSIONS.SMS_VIEW,
-        PERMISSIONS.SMS_SEND,
-        PERMISSIONS.SMS_DELETE,
-        // Tickets
-        PERMISSIONS.TICKETS_VIEW,
-        PERMISSIONS.TICKETS_CREATE,
-        PERMISSIONS.TICKETS_RESPOND,
-        PERMISSIONS.TICKETS_CLOSE,
-        // Settings (password only)
+        PERMISSIONS.SMS_COMPOSE,
+        // Packages (view only)
+        PERMISSIONS.PACKAGES_VIEW,
+        PERMISSIONS.PACKAGES_DETAILS_VIEW,
+        // Settings
         PERMISSIONS.SETTINGS_PASSWORD,
     ],
 
-    // Field Technician: Router/NAS focus, customer view
+    // Field Technician: Router/NAS focus
     FIELD_TECH: [
+        // Dashboard (limited)
         PERMISSIONS.DASHBOARD_VIEW,
-        // Customers (view only)
-        PERMISSIONS.CUSTOMERS_VIEW,
-        // Packages (view only)
-        PERMISSIONS.PACKAGES_VIEW,
-        // Routers (full except delete)
+        PERMISSIONS.DASHBOARD_ACTIVE_SESSIONS,
+        // PPPoE (view + technical actions)
+        PERMISSIONS.PPPOE_VIEW,
+        PERMISSIONS.PPPOE_DETAILS_VIEW,
+        PERMISSIONS.PPPOE_RESET_MAC,
+        PERMISSIONS.PPPOE_PURGE,
+        PERMISSIONS.PPPOE_RESOLVE,
+        // Hotspot (view + technical)
+        PERMISSIONS.HOTSPOT_VIEW,
+        PERMISSIONS.HOTSPOT_DETAILS_VIEW,
+        PERMISSIONS.HOTSPOT_RESET_MAC,
+        PERMISSIONS.HOTSPOT_PURGE,
+        PERMISSIONS.HOTSPOT_RESET_COUNTERS,
+        // Maps
+        PERMISSIONS.MAPS_VIEW,
+        // Routers (full technical access)
         PERMISSIONS.ROUTERS_VIEW,
-        PERMISSIONS.ROUTERS_CREATE,
+        PERMISSIONS.ROUTERS_ADD,
+        PERMISSIONS.ROUTERS_DETAILS_VIEW,
         PERMISSIONS.ROUTERS_EDIT,
         PERMISSIONS.ROUTERS_TEST,
         PERMISSIONS.ROUTERS_CONFIG,
-        PERMISSIONS.ROUTERS_DISCONNECT,
-        // Tickets (view and respond)
-        PERMISSIONS.TICKETS_VIEW,
-        PERMISSIONS.TICKETS_RESPOND,
-        // Settings (password only)
+        // Packages (view only)
+        PERMISSIONS.PACKAGES_VIEW,
+        PERMISSIONS.PACKAGES_DETAILS_VIEW,
+        // Settings
         PERMISSIONS.SETTINGS_PASSWORD,
     ],
 };
 
 // ============ PERMISSION HELPERS ============
 
-/**
- * Get effective permissions for a user (role defaults + added - removed)
- */
 export function getEffectivePermissions(user: User | null): Permission[] {
     if (!user) return [];
-
     const rolePermissions = ROLE_PERMISSIONS[user.role] || [];
     const added = (user.addedPermissions || []) as Permission[];
     const removed = (user.removedPermissions || []) as Permission[];
-
-    // Combine role permissions with added, then remove revoked
     const combined = new Set([...rolePermissions, ...added]);
     removed.forEach(p => combined.delete(p));
-
     return Array.from(combined);
 }
 
-/**
- * Check if a user has a specific permission
- */
 export function hasPermission(user: User | null, permission: Permission): boolean {
     if (!user) return false;
-
-    // Super Admin always has all permissions
     if (user.role === 'SUPER_ADMIN') return true;
-
     const effective = getEffectivePermissions(user);
     return effective.includes(permission);
 }
 
-/**
- * Check if a user has any of the specified permissions
- */
 export function hasAnyPermission(user: User | null, permissions: Permission[]): boolean {
     return permissions.some(p => hasPermission(user, p));
 }
 
-/**
- * Check if a user has all of the specified permissions
- */
 export function hasAllPermissions(user: User | null, permissions: Permission[]): boolean {
     return permissions.every(p => hasPermission(user, p));
 }
 
 // ============ PERMISSION GROUPS FOR UI ============
 export const PERMISSION_GROUPS = {
-    customers: {
-        label: 'Customers',
+    dashboard: {
+        label: 'Dashboard',
         permissions: [
-            { key: PERMISSIONS.CUSTOMERS_VIEW, label: 'View' },
-            { key: PERMISSIONS.CUSTOMERS_CREATE, label: 'Add' },
-            { key: PERMISSIONS.CUSTOMERS_EDIT, label: 'Edit' },
-            { key: PERMISSIONS.CUSTOMERS_DELETE, label: 'Delete' },
-            { key: PERMISSIONS.CUSTOMERS_SUSPEND, label: 'Suspend/Activate' },
+            { key: PERMISSIONS.DASHBOARD_VIEW, label: 'View Dashboard' },
+            { key: PERMISSIONS.DASHBOARD_ACTIVE_SESSIONS, label: 'Active Sessions Card' },
+            { key: PERMISSIONS.DASHBOARD_TOTAL_CUSTOMERS, label: 'Total Customers Card' },
+            { key: PERMISSIONS.DASHBOARD_MONTHLY_REVENUE, label: 'Monthly Revenue Card' },
+            { key: PERMISSIONS.DASHBOARD_TODAY_REVENUE, label: 'Today Revenue Card' },
+            { key: PERMISSIONS.DASHBOARD_NETWORK_USAGE, label: 'Network Usage' },
+            { key: PERMISSIONS.DASHBOARD_PAYMENTS, label: 'Payments Card' },
         ],
     },
-    packages: {
-        label: 'Packages',
+    pppoe: {
+        label: 'PPPoE Customers',
         permissions: [
-            { key: PERMISSIONS.PACKAGES_VIEW, label: 'View' },
-            { key: PERMISSIONS.PACKAGES_CREATE, label: 'Create' },
-            { key: PERMISSIONS.PACKAGES_EDIT, label: 'Edit' },
-            { key: PERMISSIONS.PACKAGES_DELETE, label: 'Delete' },
+            { key: PERMISSIONS.PPPOE_VIEW, label: 'View PPPoE Page' },
+            { key: PERMISSIONS.PPPOE_ADD_USER, label: 'Add User' },
+            { key: PERMISSIONS.PPPOE_SEND_BULK_SMS, label: 'Send Bulk SMS' },
+            { key: PERMISSIONS.PPPOE_DETAILS_VIEW, label: 'View Details' },
+            { key: PERMISSIONS.PPPOE_EDIT, label: 'Edit User' },
+            { key: PERMISSIONS.PPPOE_ADD_CHILD, label: 'Add Child Account' },
+            { key: PERMISSIONS.PPPOE_SEND_SMS, label: 'Send SMS' },
+            { key: PERMISSIONS.PPPOE_DELETE, label: 'Delete User' },
+            { key: PERMISSIONS.PPPOE_SUSPEND, label: 'Suspend/Activate' },
+            { key: PERMISSIONS.PPPOE_RESET_MAC, label: 'Reset MAC' },
+            { key: PERMISSIONS.PPPOE_LOCK_MAC, label: 'Lock MAC' },
+            { key: PERMISSIONS.PPPOE_PURGE, label: 'Purge' },
+            { key: PERMISSIONS.PPPOE_OVERRIDE_PLAN, label: 'Override Plan' },
+            { key: PERMISSIONS.PPPOE_SPEED_BOOST, label: 'Speed Boost' },
+            { key: PERMISSIONS.PPPOE_STATIC_IP, label: 'Static IP' },
+            { key: PERMISSIONS.PPPOE_CHANGE_PLAN, label: 'Change Plan' },
+            { key: PERMISSIONS.PPPOE_CHANGE_EXPIRY, label: 'Change Expiry' },
+            { key: PERMISSIONS.PPPOE_RESOLVE, label: 'Resolve' },
         ],
     },
-    routers: {
-        label: 'Routers/NAS',
+    hotspot: {
+        label: 'Hotspot Customers',
         permissions: [
-            { key: PERMISSIONS.ROUTERS_VIEW, label: 'View' },
-            { key: PERMISSIONS.ROUTERS_CREATE, label: 'Add' },
-            { key: PERMISSIONS.ROUTERS_EDIT, label: 'Edit' },
-            { key: PERMISSIONS.ROUTERS_DELETE, label: 'Delete' },
-            { key: PERMISSIONS.ROUTERS_TEST, label: 'Test Connection' },
-            { key: PERMISSIONS.ROUTERS_CONFIG, label: 'Generate Config' },
-            { key: PERMISSIONS.ROUTERS_DISCONNECT, label: 'Disconnect User' },
+            { key: PERMISSIONS.HOTSPOT_VIEW, label: 'View Hotspot Page' },
+            { key: PERMISSIONS.HOTSPOT_ADD_USER, label: 'Add User' },
+            { key: PERMISSIONS.HOTSPOT_DELETE_EXPIRED, label: 'Delete Expired' },
+            { key: PERMISSIONS.HOTSPOT_DELETE_UNUSED, label: 'Delete Unused' },
+            { key: PERMISSIONS.HOTSPOT_DETAILS_VIEW, label: 'View Details' },
+            { key: PERMISSIONS.HOTSPOT_DELETE, label: 'Delete User' },
+            { key: PERMISSIONS.HOTSPOT_RESET_MAC, label: 'Reset MAC' },
+            { key: PERMISSIONS.HOTSPOT_PURGE, label: 'Purge' },
+            { key: PERMISSIONS.HOTSPOT_RESET_COUNTERS, label: 'Reset Counters' },
+            { key: PERMISSIONS.HOTSPOT_CHANGE_PACKAGE, label: 'Change Package' },
         ],
     },
     payments: {
         label: 'Payments',
         permissions: [
-            { key: PERMISSIONS.PAYMENTS_VIEW, label: 'View' },
-            { key: PERMISSIONS.PAYMENTS_PROCESS, label: 'Process' },
-            { key: PERMISSIONS.PAYMENTS_REFUND, label: 'Refund' },
-            { key: PERMISSIONS.PAYMENTS_REPORTS, label: 'Reports' },
-        ],
-    },
-    vouchers: {
-        label: 'Vouchers',
-        permissions: [
-            { key: PERMISSIONS.VOUCHERS_VIEW, label: 'View' },
-            { key: PERMISSIONS.VOUCHERS_GENERATE, label: 'Generate' },
-            { key: PERMISSIONS.VOUCHERS_PRINT, label: 'Print' },
+            { key: PERMISSIONS.PAYMENTS_VIEW_ELECTRONIC, label: 'Electronic Payments' },
+            { key: PERMISSIONS.PAYMENTS_VIEW_MANUAL, label: 'Manual Recharge' },
         ],
     },
     sms: {
         label: 'SMS',
         permissions: [
-            { key: PERMISSIONS.SMS_VIEW, label: 'View' },
-            { key: PERMISSIONS.SMS_SEND, label: 'Send' },
-            { key: PERMISSIONS.SMS_DELETE, label: 'Delete' },
+            { key: PERMISSIONS.SMS_VIEW, label: 'View SMS Logs' },
+            { key: PERMISSIONS.SMS_SETTINGS, label: 'Settings' },
+            { key: PERMISSIONS.SMS_COMPOSE, label: 'Compose SMS' },
+            { key: PERMISSIONS.SMS_CLEAR, label: 'Clear All' },
+            { key: PERMISSIONS.SMS_DELETE, label: 'Delete Message' },
+            { key: PERMISSIONS.SMS_RESEND, label: 'Resend Message' },
         ],
     },
-    tickets: {
-        label: 'Tickets',
+    maps: {
+        label: 'Maps',
         permissions: [
-            { key: PERMISSIONS.TICKETS_VIEW, label: 'View' },
-            { key: PERMISSIONS.TICKETS_CREATE, label: 'Create' },
-            { key: PERMISSIONS.TICKETS_RESPOND, label: 'Respond' },
-            { key: PERMISSIONS.TICKETS_CLOSE, label: 'Close' },
+            { key: PERMISSIONS.MAPS_VIEW, label: 'View Maps' },
         ],
-
+    },
+    packages: {
+        label: 'Packages',
+        permissions: [
+            { key: PERMISSIONS.PACKAGES_VIEW, label: 'View Packages' },
+            { key: PERMISSIONS.PACKAGES_ADD_HOTSPOT, label: 'Add Hotspot Package' },
+            { key: PERMISSIONS.PACKAGES_ADD_PPPOE, label: 'Add PPPoE Package' },
+            { key: PERMISSIONS.PACKAGES_DETAILS_VIEW, label: 'View Details' },
+            { key: PERMISSIONS.PACKAGES_EDIT, label: 'Edit Package' },
+            { key: PERMISSIONS.PACKAGES_DELETE, label: 'Delete Package' },
+        ],
+    },
+    routers: {
+        label: 'Routers/NAS',
+        permissions: [
+            { key: PERMISSIONS.ROUTERS_VIEW, label: 'View Routers' },
+            { key: PERMISSIONS.ROUTERS_ADD, label: 'Add Router' },
+            { key: PERMISSIONS.ROUTERS_TUTORIAL, label: 'Tutorial' },
+            { key: PERMISSIONS.ROUTERS_DETAILS_VIEW, label: 'View Details' },
+            { key: PERMISSIONS.ROUTERS_EDIT, label: 'Edit Router' },
+            { key: PERMISSIONS.ROUTERS_DELETE, label: 'Delete Router' },
+            { key: PERMISSIONS.ROUTERS_TEST, label: 'Test Connection' },
+            { key: PERMISSIONS.ROUTERS_CONFIG, label: 'Generate Config' },
+            { key: PERMISSIONS.ROUTERS_DISCONNECT, label: 'Disconnect User' },
+        ],
+    },
+    finance: {
+        label: 'Finance',
+        permissions: [
+            { key: PERMISSIONS.FINANCE_DASHBOARD_VIEW, label: 'View Dashboard' },
+            { key: PERMISSIONS.FINANCE_VIEW_CHARTS, label: 'View Charts' },
+            { key: PERMISSIONS.FINANCE_INCOME_VIEW, label: 'View Income' },
+            { key: PERMISSIONS.FINANCE_INCOME_CREATE, label: 'Record Income' },
+            { key: PERMISSIONS.FINANCE_EXPENSES_VIEW, label: 'View Expenses' },
+            { key: PERMISSIONS.FINANCE_EXPENSES_CREATE, label: 'Create Expense' },
+            { key: PERMISSIONS.FINANCE_REPORTS_VIEW, label: 'View Reports' },
+            { key: PERMISSIONS.FINANCE_REPORTS_GENERATE, label: 'Generate Reports' },
+        ],
     },
     operators: {
         label: 'Team Members',
         permissions: [
-            { key: PERMISSIONS.OPERATORS_VIEW, label: 'View' },
-            { key: PERMISSIONS.OPERATORS_CREATE, label: 'Add' },
-            { key: PERMISSIONS.OPERATORS_EDIT, label: 'Edit' },
-            { key: PERMISSIONS.OPERATORS_DELETE, label: 'Delete' },
+            { key: PERMISSIONS.OPERATORS_VIEW, label: 'View Team' },
+            { key: PERMISSIONS.OPERATORS_ADD, label: 'Add Operator' },
+            { key: PERMISSIONS.OPERATORS_DETAILS_VIEW, label: 'View Details' },
+            { key: PERMISSIONS.OPERATORS_EDIT, label: 'Edit Operator' },
+            { key: PERMISSIONS.OPERATORS_DELETE, label: 'Delete Operator' },
+            { key: PERMISSIONS.OPERATORS_MANAGE_PERMISSIONS, label: 'Manage Permissions' },
         ],
     },
     settings: {
@@ -280,26 +350,8 @@ export const PERMISSION_GROUPS = {
             { key: PERMISSIONS.SETTINGS_LICENCE, label: 'Licence' },
             { key: PERMISSIONS.SETTINGS_INVOICES, label: 'Invoices' },
             { key: PERMISSIONS.SETTINGS_PAYMENT_GATEWAY, label: 'Payment Gateway' },
-            { key: PERMISSIONS.SETTINGS_SMS, label: 'SMS Configuration' },
+            { key: PERMISSIONS.SETTINGS_SMS, label: 'SMS Config' },
             { key: PERMISSIONS.SETTINGS_PASSWORD, label: 'Change Password' },
-        ],
-    },
-    finance: {
-        label: 'Finance',
-        permissions: [
-            { key: PERMISSIONS.FINANCE_VIEW, label: 'View' },
-            { key: PERMISSIONS.FINANCE_DASHBOARD, label: 'Dashboard' },
-            { key: PERMISSIONS.FINANCE_INCOME_CREATE, label: 'Record Income' },
-            { key: PERMISSIONS.FINANCE_INVOICES, label: 'Invoices' },
-            { key: PERMISSIONS.FINANCE_INVOICES_CREATE, label: 'Create Invoices' },
-            { key: PERMISSIONS.FINANCE_EXPENSES, label: 'Expenses' },
-            { key: PERMISSIONS.FINANCE_EXPENSES_CREATE, label: 'Create Expenses' },
-            { key: PERMISSIONS.FINANCE_ACCOUNTS, label: 'Chart of Accounts' },
-            { key: PERMISSIONS.FINANCE_TRANSACTIONS, label: 'Transactions' },
-            { key: PERMISSIONS.FINANCE_REPORTS, label: 'Reports' },
-            { key: PERMISSIONS.FINANCE_RECONCILIATION, label: 'Reconciliation' },
-            { key: PERMISSIONS.FINANCE_TAX, label: 'Tax Management' },
-            { key: PERMISSIONS.FINANCE_MPESA, label: 'M-Pesa Settings' },
         ],
     },
 };

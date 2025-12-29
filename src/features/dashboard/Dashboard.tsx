@@ -70,22 +70,22 @@ export function Dashboard() {
         {
             name: "Active Sessions",
             value: loading ? "..." : formatNumber(stats?.activeSessions || 0),
-            permission: PERMISSIONS.CUSTOMERS_VIEW,
+            permission: PERMISSIONS.DASHBOARD_ACTIVE_SESSIONS,
         },
         {
             name: "Total Customers",
             value: loading ? "..." : formatNumber(stats?.totalCustomers || 0),
-            permission: PERMISSIONS.CUSTOMERS_VIEW,
+            permission: PERMISSIONS.DASHBOARD_TOTAL_CUSTOMERS,
         },
         {
             name: "Monthly Revenue",
             value: loading ? "..." : `KES ${formatNumber(stats?.monthlyRevenue || 0)}`,
-            permission: PERMISSIONS.PAYMENTS_VIEW,
+            permission: PERMISSIONS.DASHBOARD_MONTHLY_REVENUE,
         },
         {
             name: "Today's Revenue",
             value: loading ? "..." : `KES ${formatNumber(stats?.todayRevenue || 0)}`,
-            permission: PERMISSIONS.PAYMENTS_VIEW,
+            permission: PERMISSIONS.DASHBOARD_TODAY_REVENUE,
         },
     ];
 
@@ -159,7 +159,7 @@ export function Dashboard() {
                         </select>
                     </div>
                     <PermissionGate
-                        permission={PERMISSIONS.ANALYTICS_VIEW}
+                        permission={PERMISSIONS.DASHBOARD_NETWORK_USAGE}
                         fallback={
                             <div className="h-48 md:h-64 flex flex-col items-center justify-center text-slate-400">
                                 <Lock className="w-10 h-10 mb-3 opacity-50" />
@@ -233,7 +233,7 @@ export function Dashboard() {
                         </select>
                     </div>
                     <PermissionGate
-                        permission={PERMISSIONS.PAYMENTS_REPORTS}
+                        permission={PERMISSIONS.DASHBOARD_PAYMENTS}
                         fallback={
                             <div className="h-48 md:h-64 flex flex-col items-center justify-center text-slate-400">
                                 <Lock className="w-10 h-10 mb-3 opacity-50" />
