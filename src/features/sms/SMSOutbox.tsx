@@ -1,21 +1,26 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, FileDown, RotateCcw, Loader2, Trash2, Settings, PenSquare, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
 import { Modal } from "../../components/ui/Modal";
+import { SmsSettingsModal } from "./SmsSettingsModal";
 import { usePermissions } from "../../hooks/usePermissions";
 import { PERMISSIONS } from "../../lib/permissions";
 import api from "../../services/api";
 
 interface SMSLog {
-    id: number;
-    phone: string;
+    id: string | number;
+    phone?: string;
+    recipient?: string;
+    recipients?: string;
     message: string;
     status: string;
     initiator: string;
-    date: string;
+    createdAt: string;
 }
 
 export function SMSOutbox() {
+    const navigate = useNavigate();
     const { can } = usePermissions();
     const [searchQuery, setSearchQuery] = useState("");
     const [rowsPerPage, setRowsPerPage] = useState(20);
@@ -25,14 +30,45 @@ export function SMSOutbox() {
     const [showComposeModal, setShowComposeModal] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [smsLogs, setSmsLogs] = useState<SMSLog[]>([]);
+    const [smsBalance, setSmsBalance] = useState<{ balance: number; provider: string } | null>(null);
+
+    // Fetch SMS balance
+    const fetchSmsBalance = useCallback(async () => {
+        try {
+            const response = await api.get('/tenant/sms-balance');
+            if (response.data.success !== false) {
+                setSmsBalance(prev => ({
+                    provider: prev?.provider || '',
+                    balance: response.data.balance ?? 0,
+                }));
+            }
+        } catch (error) {
+            console.error('Failed to fetch SMS balance:', error);
+        }
+    }, []);
+
+    // Fetch SMS config for provider name
+    const fetchSmsConfig = useCallback(async () => {
+        try {
+            const response = await api.get('/tenant/sms-config');
+            if (response.data.provider) {
+                setSmsBalance(prev => ({
+                    balance: prev?.balance ?? 0,
+                    provider: response.data.provider,
+                }));
+            }
+        } catch (error) {
+            console.error('Failed to fetch SMS config:', error);
+        }
+    }, []);
 
     // Fetch SMS logs from API
     useEffect(() => {
         const fetchSMSLogs = async () => {
             setLoading(true);
             try {
-                const response = await api.get('/sms/logs');
-                setSmsLogs(response.data || []);
+                const response = await api.get('/sms');
+                setSmsLogs(response.data.logs || []);
             } catch (error) {
                 console.error("Failed to fetch SMS logs:", error);
                 setSmsLogs([]);
@@ -41,15 +77,20 @@ export function SMSOutbox() {
             }
         };
         fetchSMSLogs();
-    }, []);
+        fetchSmsBalance();
+        fetchSmsConfig();
+    }, [fetchSmsBalance, fetchSmsConfig]);
 
     // Filter Logic
     const filteredData = useMemo(() => {
-        return smsLogs.filter(item =>
-            item.phone.includes(searchQuery) ||
-            item.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.initiator.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        return smsLogs.filter(item => {
+            const phone = item.phone || item.recipient || item.recipients || '';
+            return (
+                phone.includes(searchQuery) ||
+                (item.message || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (item.initiator || '').toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        });
     }, [searchQuery, smsLogs]);
 
     // Pagination Logic
@@ -114,23 +155,57 @@ export function SMSOutbox() {
         }
     };
 
-    const sendSMS = (e: React.FormEvent) => {
+    const [composePhone, setComposePhone] = useState('');
+    const [composeMessage, setComposeMessage] = useState('');
+    const [sendingMsg, setSendingMsg] = useState(false);
+
+    const sendSMS = async (e: React.FormEvent) => {
         e.preventDefault();
-        toast.promise(
-            new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(true);
-                    setShowComposeModal(false);
-                }, 1500);
-            }),
-            {
-                loading: 'Sending SMS...',
-                success: 'Message sent successfully',
-                error: 'Failed to send message',
+        if (!composePhone || !composeMessage) {
+            toast.error('Please enter phone and message');
+            return;
+        }
+
+        setSendingMsg(true);
+        try {
+            const response = await api.post('/sms', {
+                recipients: composePhone,
+                message: composeMessage,
+            });
+            if (response.data.success) {
+                toast.success(`SMS sent successfully! (${response.data.sent} sent)`);
+                setShowComposeModal(false);
+                setComposePhone('');
+                setComposeMessage('');
+                // Refresh logs
+                const logsRes = await api.get('/sms');
+                setSmsLogs(logsRes.data.logs || []);
+                // Refresh balance
+                fetchSmsBalance();
+            } else {
+                toast.error(response.data.message || 'Failed to send SMS');
             }
-        );
+        } catch (error: any) {
+            const msg = error.response?.data?.message || 'Failed to send SMS';
+            toast.error(msg);
+        } finally {
+            setSendingMsg(false);
+        }
     };
 
+
+    const truncateMessage = (message: string) => {
+        if (!message) return '';
+        return message.length > 40 ? `${message.substring(0, 40)}...` : message;
+    };
+
+    const truncateId = (id: string | number) => {
+        const strId = String(id);
+        if (strId.length > 12) {
+            return `${strId.substring(0, 8)}...${strId.substring(strId.length - 4)}`;
+        }
+        return strId;
+    };
 
     const getPageNumbers = () => {
         const pages: (number | string)[] = [];
@@ -160,11 +235,18 @@ export function SMSOutbox() {
                         </div>
                     </div>
                     <div className="space-y-1 flex flex-col items-center md:items-start">
-                        <h2 className="text-lg font-bold text-slate-200">BLESSEDTEXTS</h2>
+                        <h2 className="text-lg font-bold text-cyan-400">
+                            {smsBalance?.provider || 'No Provider Configured'}
+                        </h2>
                         <div className="flex items-center gap-2">
-                            <h2 className="text-lg font-bold text-slate-200">SMS BALANCE: 201</h2>
+                            <h2 className="text-lg font-bold text-slate-200">
+                                SMS BALANCE: {smsBalance?.balance ?? '---'}
+                            </h2>
                             <button
-                                onClick={() => toast.success("Balance refreshed: 201")}
+                                onClick={() => {
+                                    fetchSmsBalance();
+                                    toast.success("Balance refreshed");
+                                }}
                                 className="p-1 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-full transition-all"
                                 title="Refresh Balance"
                             >
@@ -277,39 +359,14 @@ export function SMSOutbox() {
             </Modal>
 
             {/* SMS Settings Modal */}
-            <Modal
+            <SmsSettingsModal
                 isOpen={showSettingsModal}
                 onClose={() => setShowSettingsModal(false)}
-                title="SMS Settings"
-            >
-                <div className="space-y-6">
-                    <div className="text-center space-y-4">
-                        <p className="text-slate-400 text-sm">Manage your SMS Settings and details</p>
-                        <button className="px-4 py-2 border border-slate-600 text-slate-300 rounded-lg hover:bg-slate-700 hover:text-white transition-all text-sm uppercase">
-                            SMS Templates
-                        </button>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase">
-                            Select SMS Provider: <span className="text-red-500">*</span>
-                        </label>
-                        <select className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none">
-                            <option value="">---Select---</option>
-                            <option value="BLESSEDTEXTS">BLESSEDTEXTS KENYA</option>
-                            <option value="BYTEWAVE">Bytewave KENYA</option>
-                            <option value="TEXTSMS">TextSMS KENYA</option>
-                            <option value="TALKSASA">TALKSASA KENYA</option>
-                            <option value="CELCOM">CELCOM KENYA</option>
-                            <option value="AFRICAISTALKING">Africa Is Talking</option>
-                            <option value="ADVANTA">Advanta AFRICA Limited</option>
-                            <option value="HOSTPINNACLE">HOSTPINNACLE KENYA</option>
-                            <option value="TILIL">TILIL KENYA</option>
-                            <option value="NEXTSMS">NEXTSMS TANZANIA</option>
-                        </select>
-                    </div>
-                </div>
-            </Modal>
+                onSave={() => {
+                    fetchSmsBalance();
+                    toast.success('SMS settings saved');
+                }}
+            />
 
             {/* Compose SMS Modal */}
             <Modal
@@ -326,6 +383,8 @@ export function SMSOutbox() {
                             type="tel"
                             placeholder="e.g. 254712345678"
                             required
+                            value={composePhone}
+                            onChange={(e) => setComposePhone(e.target.value)}
                             className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
@@ -337,6 +396,8 @@ export function SMSOutbox() {
                             placeholder="Type your message here..."
                             required
                             rows={4}
+                            value={composeMessage}
+                            onChange={(e) => setComposeMessage(e.target.value)}
                             className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                         />
                     </div>
@@ -350,10 +411,15 @@ export function SMSOutbox() {
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2"
+                            disabled={sendingMsg}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <PenSquare className="w-4 h-4" />
-                            Send Message
+                            {sendingMsg ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <PenSquare className="w-4 h-4" />
+                            )}
+                            {sendingMsg ? 'Sending...' : 'Send Message'}
                         </button>
                     </div>
                 </form>
@@ -366,9 +432,9 @@ export function SMSOutbox() {
                         <thead className="bg-slate-900/50">
                             <tr>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap w-12">#</th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap">ID</th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap">PHONE</th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap w-[40%]">MESSAGE</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap w-[15%]">ID</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap w-[15%]">PHONE</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap w-[30%]">MESSAGE</th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap">STATUS</th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap">INITIATOR</th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap">DATE</th>
@@ -393,24 +459,36 @@ export function SMSOutbox() {
                                     <tr key={item.id} className="hover:bg-slate-700/30 transition-colors">
                                         <td className="px-4 py-3 text-sm text-slate-400 whitespace-nowrap">{(currentPage - 1) * rowsPerPage + index + 1}</td>
                                         <td className="px-4 py-3 whitespace-nowrap">
-                                            <span className="text-sm font-medium text-blue-400 hover:text-blue-300 cursor-pointer">{item.id}</span>
+                                            <span
+                                                className="text-sm font-medium text-blue-400 hover:text-blue-300 cursor-pointer underline"
+                                                title={`View Details: ${item.id}`}
+                                                onClick={() => navigate(`/sms/${item.id}`)}
+                                            >
+                                                {truncateId(item.id)}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap">
-                                            <span className="text-sm text-slate-300">{item.phone}</span>
+                                            <span className="text-sm text-slate-300">
+                                                {item.phone || item.recipient || item.recipients || '-'}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <div className="text-sm text-slate-300 truncate max-w-[400px]" title={item.message}>
-                                                {item.message}
+                                            <div className="text-sm text-slate-300" title={item.message}>
+                                                {truncateMessage(item.message)}
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap">
                                             <span className="text-sm font-medium text-green-500">{item.status}</span>
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap">
-                                            <span className="text-sm text-slate-300">{item.initiator}</span>
+                                            <span className="text-sm text-slate-300 capitalize">
+                                                {(item.initiator || 'System').replace(/_/g, ' ')}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap">
-                                            <span className="text-sm text-slate-400">{item.date}</span>
+                                            <span className="text-sm text-slate-400">
+                                                {item.createdAt ? new Date(item.createdAt).toLocaleString() : '-'}
+                                            </span>
                                         </td>
                                     </tr>
                                 ))

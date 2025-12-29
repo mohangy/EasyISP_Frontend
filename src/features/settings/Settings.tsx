@@ -1,18 +1,20 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Building2, CreditCard, FileText, Key, Settings as SettingsIcon, Loader2, MapPin, Mail, Phone, User, AlertTriangle, Eye, EyeOff, X, HelpCircle } from "lucide-react";
+import { Building2, CreditCard, FileText, Key, Settings as SettingsIcon, Loader2, MapPin, Mail, Phone, User, AlertTriangle, Eye, EyeOff, X, HelpCircle, MessageSquare } from "lucide-react";
 import { tenantApi, type Tenant, type Invoice } from "../../services/tenantService";
 import toast from "react-hot-toast";
 import { usePermissions } from "../../hooks/usePermissions";
 import { PERMISSIONS, type Permission } from "../../lib/permissions";
+import { SmsSettingsForm } from "../sms/SmsSettingsForm";
 
-type TabId = "general" | "licence" | "invoices" | "payment" | "password";
+type TabId = "general" | "licence" | "invoices" | "payment" | "sms" | "password";
 
 const tabs: { id: TabId; name: string; icon: React.ElementType; permission?: Permission }[] = [
     { id: "general", name: "General", icon: Building2, permission: PERMISSIONS.SETTINGS_GENERAL },
     { id: "licence", name: "Licence", icon: FileText, permission: PERMISSIONS.SETTINGS_LICENCE },
     { id: "invoices", name: "Invoices", icon: CreditCard, permission: PERMISSIONS.SETTINGS_INVOICES },
     { id: "payment", name: "Payment Gateway", icon: CreditCard, permission: PERMISSIONS.SETTINGS_PAYMENT_GATEWAY },
+    { id: "sms", name: "SMS", icon: MessageSquare, permission: PERMISSIONS.SETTINGS_SMS },
     { id: "password", name: "Change Password", icon: Key, permission: PERMISSIONS.SETTINGS_PASSWORD },
 ];
 
@@ -112,6 +114,7 @@ export function Settings() {
                     {activeTab === "licence" && tenant && <LicenceTab tenant={tenant} />}
                     {activeTab === "invoices" && <InvoicesTab />}
                     {activeTab === "payment" && <PaymentGatewayTab />}
+                    {activeTab === "sms" && <SmsSettingsForm />}
                     {activeTab === "password" && <ChangePasswordTab />}
                 </div>
             </div>

@@ -61,6 +61,7 @@ export const PERMISSIONS = {
     SETTINGS_LICENCE: 'settings:licence',
     SETTINGS_INVOICES: 'settings:invoices',
     SETTINGS_PAYMENT_GATEWAY: 'settings:payment_gateway',
+    SETTINGS_SMS: 'settings:sms',
     SETTINGS_PASSWORD: 'settings:password',
 
     // Finance
@@ -279,6 +280,7 @@ export const PERMISSION_GROUPS = {
             { key: PERMISSIONS.SETTINGS_LICENCE, label: 'Licence' },
             { key: PERMISSIONS.SETTINGS_INVOICES, label: 'Invoices' },
             { key: PERMISSIONS.SETTINGS_PAYMENT_GATEWAY, label: 'Payment Gateway' },
+            { key: PERMISSIONS.SETTINGS_SMS, label: 'SMS Configuration' },
             { key: PERMISSIONS.SETTINGS_PASSWORD, label: 'Change Password' },
         ],
     },

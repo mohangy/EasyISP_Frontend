@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { Plus, MessageSquare, Download, RotateCcw, X, Loader2 } from "lucide-react";
 import { customerApi, type Customer, type CreateCustomerData } from "../../services/customerService";
+import api from "../../services/api";
 import toast from "react-hot-toast";
 import { usePermissions } from "../../hooks/usePermissions";
 import { PERMISSIONS } from "../../lib/permissions";
@@ -31,6 +32,10 @@ export function PPPoECustomers() {
     const [pageSize, setPageSize] = useState(20);
     const [currentPage, setCurrentPage] = useState(1);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showBulkSmsModal, setShowBulkSmsModal] = useState(false);
+    const [bulkSmsMessage, setBulkSmsMessage] = useState('');
+    const [sendingBulkSms, setSendingBulkSms] = useState(false);
+    const [bulkSmsStatusFilter, setBulkSmsStatusFilter] = useState<string>('');
 
     // Initialize filters from location state
     useEffect(() => {
@@ -230,6 +235,93 @@ export function PPPoECustomers() {
 
     return (
         <div className="space-y-4 animate-fade-in">
+            {/* Bulk SMS Modal */}
+            {showBulkSmsModal && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 bg-black/70 backdrop-blur-md" onClick={() => setShowBulkSmsModal(false)} />
+                    <div className="relative bg-slate-900 border border-slate-700 rounded-xl w-full max-w-lg shadow-2xl">
+                        <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                            <h2 className="text-lg font-semibold text-white">Send Bulk SMS</h2>
+                            <button onClick={() => setShowBulkSmsModal(false)} className="p-1 text-slate-400 hover:text-white transition-colors">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-4 space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-slate-400 mb-1">TARGET CUSTOMERS</label>
+                                <select
+                                    value={bulkSmsStatusFilter}
+                                    onChange={(e) => setBulkSmsStatusFilter(e.target.value)}
+                                    className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">All Customers</option>
+                                    <option value="ACTIVE">Active Only</option>
+                                    <option value="EXPIRED">Expired Only</option>
+                                    <option value="SUSPENDED">Suspended Only</option>
+                                    <option value="DISABLED">Disabled Only</option>
+                                </select>
+                            </div>
+                            <div className="text-sm text-slate-400 bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+                                Recipients: <strong className="text-cyan-400">{customers.filter(c => c.phone && (!bulkSmsStatusFilter || c.status === bulkSmsStatusFilter)).length}</strong> customers with phone numbers
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-slate-400 mb-1">MESSAGE (160 chars max)</label>
+                                <textarea
+                                    value={bulkSmsMessage}
+                                    onChange={(e) => setBulkSmsMessage(e.target.value.slice(0, 160))}
+                                    placeholder="Type your message here..."
+                                    rows={4}
+                                    className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                />
+                                <div className="text-right text-xs text-slate-500 mt-1">{bulkSmsMessage.length}/160</div>
+                            </div>
+                            <div className="flex items-center gap-3 pt-2">
+                                <button
+                                    onClick={async () => {
+                                        const recipients = customers
+                                            .filter(c => c.phone && (!bulkSmsStatusFilter || c.status === bulkSmsStatusFilter))
+                                            .map(c => c.phone!);
+                                        if (recipients.length === 0) {
+                                            toast.error('No customers with phone numbers matching filter');
+                                            return;
+                                        }
+                                        if (!bulkSmsMessage.trim()) {
+                                            toast.error('Please enter a message');
+                                            return;
+                                        }
+                                        setSendingBulkSms(true);
+                                        try {
+                                            const res = await api.post('/sms', { recipients, message: bulkSmsMessage });
+                                            toast.success(`Sent to ${res.data.sent} recipients. ${res.data.failed} failed.`);
+                                            setShowBulkSmsModal(false);
+                                            setBulkSmsMessage('');
+                                            setBulkSmsStatusFilter('');
+                                        } catch (err) {
+                                            toast.error('Failed to send SMS');
+                                        } finally {
+                                            setSendingBulkSms(false);
+                                        }
+                                    }}
+                                    disabled={sendingBulkSms || !bulkSmsMessage.trim()}
+                                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm disabled:opacity-50"
+                                >
+                                    {sendingBulkSms && <Loader2 className="w-4 h-4 animate-spin" />}
+                                    SEND SMS
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowBulkSmsModal(false)}
+                                    className="px-6 py-2 bg-slate-700 text-white rounded-lg font-medium hover:bg-slate-600 transition-colors text-sm"
+                                >
+                                    CANCEL
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
             {/* Add User Modal - uses Portal to render at body level */}
             {showAddModal && createPortal(
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -485,6 +577,7 @@ export function PPPoECustomers() {
                 </div>
                 <div className="flex items-center gap-2">
                     <button
+                        onClick={() => can(PERMISSIONS.SMS_SEND) && setShowBulkSmsModal(true)}
                         className={`flex items-center gap-2 px-4 py-2 border border-slate-600 text-slate-200 rounded-lg transition-all text-sm ${can(PERMISSIONS.SMS_SEND) ? 'hover:bg-slate-700' : 'opacity-50 cursor-not-allowed'}`}
                         disabled={!can(PERMISSIONS.SMS_SEND)}
                         title={!can(PERMISSIONS.SMS_SEND) ? "You don't have permission to send SMS" : undefined}
