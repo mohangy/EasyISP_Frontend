@@ -85,11 +85,8 @@ export function PPPoECustomers() {
     // Fetch packages for dropdown
     const fetchPackages = useCallback(async () => {
         try {
-            const response = await fetch("/api/packages?connectionType=PPPOE");
-            if (response.ok) {
-                const data = await response.json();
-                setPackages(data.packages || []);
-            }
+            const response = await customerApi.getPackages('PPPOE');
+            setPackages(response || []);
         } catch (error) {
             console.error("Failed to fetch packages:", error);
         }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { superAdminApi, type TenantInfo, type SaaSStats } from "../../services/superAdminService";
 import { Building2, Users, Router, UserCog, TrendingUp, AlertCircle, Clock, CheckCircle2, XCircle, Ban } from "lucide-react";
 import { Button } from "../../components/ui/Button";
@@ -208,8 +209,8 @@ export function SuperAdminDashboard() {
                         key={filterType}
                         onClick={() => setFilter(filterType)}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === filterType
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                             }`}
                     >
                         {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
@@ -236,7 +237,12 @@ export function SuperAdminDashboard() {
                                 <tr key={tenant.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                                     <td className="px-6 py-4">
                                         <div>
-                                            <div className="font-medium text-slate-900 dark:text-white">{tenant.businessName}</div>
+                                            <Link
+                                                to={`/super-admin/tenant/${tenant.id}`}
+                                                className="font-medium text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                            >
+                                                {tenant.businessName}
+                                            </Link>
                                             <div className="text-sm text-slate-500 dark:text-slate-400">{tenant.email}</div>
                                         </div>
                                     </td>

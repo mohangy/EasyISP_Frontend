@@ -231,10 +231,10 @@ export const customerApi = {
     },
 
     // Get available packages for selection
-    getPackages: async (serviceType?: "PPPOE" | "HOTSPOT"): Promise<Package[]> => {
-        const params = serviceType ? `?serviceType=${serviceType}` : "";
-        const response = await api.get<Package[]>(`/packages${params}`);
-        return response.data;
+    getPackages: async (connectionType?: "PPPOE" | "HOTSPOT"): Promise<Package[]> => {
+        const params = connectionType ? `?connectionType=${connectionType}` : "";
+        const response = await api.get<{ packages: Package[] }>(`/packages${params}`);
+        return response.data.packages;
     },
 
     // Get active hotspot users from MikroTik via backend

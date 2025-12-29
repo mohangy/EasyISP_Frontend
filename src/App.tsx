@@ -27,6 +27,7 @@ import { Income } from "./features/finance/Income";
 import { Expenses } from "./features/finance/Expenses";
 import { Reports } from "./features/finance/Reports";
 import { SuperAdminDashboard } from "./features/superAdmin/SuperAdminDashboard";
+import { TenantDetailsPage } from "./features/superAdmin/TenantDetailsPage";
 import { PERMISSIONS } from "./lib/permissions";
 
 function App() {
@@ -162,6 +163,7 @@ function App() {
 
               {/* Super Admin */}
               <Route path="/super-admin" element={<SuperAdminDashboard />} />
+              <Route path="/super-admin/tenant/:id" element={<TenantDetailsPage />} />
 
               {/* Add other routes here */}
               <Route path="*" element={<div className="p-4">Page Not Found</div>} />
