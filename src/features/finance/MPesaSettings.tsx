@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Smartphone,
     CheckCircle2,
@@ -11,9 +11,11 @@ import {
     TestTube2,
     Shield,
     Clock,
-    ArrowDownRight
+    ArrowDownRight,
+    Loader2
 } from "lucide-react";
 import toast from "react-hot-toast";
+import api from "../../services/api";
 
 // Currency formatter for KES
 const formatCurrency = (amount: number) => {
@@ -25,31 +27,46 @@ const formatCurrency = (amount: number) => {
     }).format(amount);
 };
 
-// Mock M-Pesa stats
-const MPESA_STATS = {
-    todayReceived: 156700,
-    todayTransactions: 52,
-    thisMonthReceived: 2345600,
-    thisMonthTransactions: 823,
-    successRate: 98.5,
-    avgProcessingTime: 2.3, // seconds
-    pendingConfirmations: 3,
-    lastSync: "2024-12-27 10:45:32"
-};
+// M-Pesa stats interface
+interface MPesaStats {
+    todayReceived: number;
+    todayTransactions: number;
+    thisMonthReceived: number;
+    thisMonthTransactions: number;
+    successRate: number;
+    pendingConfirmations: number;
+    lastSync: string | null;
+}
 
-// Recent M-Pesa transactions
-const RECENT_TRANSACTIONS = [
-    { id: "QJI4ELP7MU", phone: "254712345678", name: "John Doe", amount: 4500, status: "success", time: "10:23:45" },
-    { id: "QJI4ELP7MV", phone: "254723456789", name: "Jane Smith", amount: 3000, status: "success", time: "10:15:22" },
-    { id: "QJI4ELP7MW", phone: "254734567890", name: "Alex Mwangi", amount: 5000, status: "pending", time: "10:10:15" },
-    { id: "QJI4ELP7MX", phone: "254745678901", name: "Grace Ochieng", amount: 7500, status: "success", time: "09:58:30" },
-    { id: "QJI4ELP7MY", phone: "254756789012", name: "Peter Kamau", amount: 2500, status: "failed", time: "09:45:12" },
-];
+// M-Pesa transaction interface
+interface MPesaTransaction {
+    id: string;
+    transactionId: string;
+    phone: string;
+    amount: number;
+    status: string;
+    customer: { id: string; name: string } | null;
+    createdAt: string;
+}
 
 export function MPesaSettings() {
     const [showSecrets, setShowSecrets] = useState(false);
     const [isTestingConnection, setIsTestingConnection] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [loadingStats, setLoadingStats] = useState(true);
+    const [loadingTransactions, setLoadingTransactions] = useState(true);
+
+    // Stats and transactions state
+    const [stats, setStats] = useState<MPesaStats>({
+        todayReceived: 0,
+        todayTransactions: 0,
+        thisMonthReceived: 0,
+        thisMonthTransactions: 0,
+        successRate: 0,
+        pendingConfirmations: 0,
+        lastSync: null
+    });
+    const [recentTransactions, setRecentTransactions] = useState<MPesaTransaction[]>([]);
 
     // Form state
     const [config, setConfig] = useState({
@@ -65,6 +82,36 @@ export function MPesaSettings() {
         transactionDesc: "Internet Subscription Payment"
     });
 
+    // Load stats and transactions on mount
+    useEffect(() => {
+        loadStats();
+        loadTransactions();
+    }, []);
+
+    const loadStats = async () => {
+        try {
+            setLoadingStats(true);
+            const { data } = await api.get('/payments/mpesa/stats');
+            setStats(data);
+        } catch (error) {
+            console.error("Failed to load M-Pesa stats:", error);
+        } finally {
+            setLoadingStats(false);
+        }
+    };
+
+    const loadTransactions = async () => {
+        try {
+            setLoadingTransactions(true);
+            const { data } = await api.get('/payments/electronic?pageSize=5');
+            setRecentTransactions(data.transactions || []);
+        } catch (error) {
+            console.error("Failed to load M-Pesa transactions:", error);
+        } finally {
+            setLoadingTransactions(false);
+        }
+    };
+
     const handleTestConnection = async () => {
         setIsTestingConnection(true);
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -77,6 +124,11 @@ export function MPesaSettings() {
         await new Promise(resolve => setTimeout(resolve, 1500));
         setIsSaving(false);
         toast.success("M-Pesa settings saved!");
+    };
+
+    const formatTime = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return date.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     };
 
     return (
@@ -116,29 +168,29 @@ export function MPesaSettings() {
                         <Smartphone className="w-6 h-6 opacity-80" />
                         <span className="text-xs bg-white/20 px-2 py-1 rounded">Today</span>
                     </div>
-                    <p className="text-2xl font-bold mt-3">{formatCurrency(MPESA_STATS.todayReceived)}</p>
-                    <p className="text-sm opacity-80">{MPESA_STATS.todayTransactions} transactions</p>
+                    <p className="text-2xl font-bold mt-3">{loadingStats ? <Loader2 className="w-6 h-6 animate-spin" /> : formatCurrency(stats.todayReceived)}</p>
+                    <p className="text-sm opacity-80">{stats.todayTransactions} transactions</p>
                 </div>
                 <div className="bg-white dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700/50">
                     <div className="flex items-center justify-between">
                         <CheckCircle2 className="w-6 h-6 text-green-500" />
                     </div>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-3">{MPESA_STATS.successRate}%</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-3">{stats.successRate}%</p>
                     <p className="text-sm text-slate-500 dark:text-slate-400">Success Rate</p>
                 </div>
                 <div className="bg-white dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700/50">
                     <div className="flex items-center justify-between">
                         <Clock className="w-6 h-6 text-blue-500" />
                     </div>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-3">{MPESA_STATS.avgProcessingTime}s</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Avg Processing</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-3">{stats.thisMonthTransactions}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">This Month</p>
                 </div>
                 <div className="bg-white dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700/50">
                     <div className="flex items-center justify-between">
                         <AlertCircle className="w-6 h-6 text-amber-500" />
                     </div>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-3">{MPESA_STATS.pendingConfirmations}</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Pending Confirmations</p>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-3">{stats.pendingConfirmations}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Pending</p>
                 </div>
             </div>
 
@@ -284,32 +336,42 @@ export function MPesaSettings() {
                             </button>
                         </div>
                         <div className="divide-y divide-slate-200 dark:divide-slate-700">
-                            {RECENT_TRANSACTIONS.map((tx) => (
-                                <div key={tx.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium text-slate-900 dark:text-white">{tx.name}</p>
-                                            <p className="text-xs text-slate-500">{tx.phone}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-semibold text-green-600 dark:text-green-400 flex items-center gap-1">
-                                                <ArrowDownRight className="w-3 h-3" />
-                                                {formatCurrency(tx.amount)}
-                                            </p>
-                                            <p className="text-xs text-slate-500">{tx.time}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between mt-2">
-                                        <span className="text-xs text-slate-400 font-mono">{tx.id}</span>
-                                        <span className={`text-xs px-2 py-0.5 rounded-full ${tx.status === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                            tx.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                            }`}>
-                                            {tx.status}
-                                        </span>
-                                    </div>
+                            {loadingTransactions ? (
+                                <div className="flex items-center justify-center p-8">
+                                    <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
                                 </div>
-                            ))}
+                            ) : recentTransactions.length > 0 ? (
+                                recentTransactions.map((tx) => (
+                                    <div key={tx.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium text-slate-900 dark:text-white">{tx.customer?.name || 'Unknown'}</p>
+                                                <p className="text-xs text-slate-500">{tx.phone}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-sm font-semibold text-green-600 dark:text-green-400 flex items-center gap-1">
+                                                    <ArrowDownRight className="w-3 h-3" />
+                                                    {formatCurrency(tx.amount)}
+                                                </p>
+                                                <p className="text-xs text-slate-500">{formatTime(tx.createdAt)}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between mt-2">
+                                            <span className="text-xs text-slate-400 font-mono">{tx.transactionId || tx.id}</span>
+                                            <span className={`text-xs px-2 py-0.5 rounded-full ${tx.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                                tx.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                                    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                                }`}>
+                                                {tx.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="p-8 text-center text-slate-400">
+                                    No recent transactions
+                                </div>
+                            )}
                         </div>
                         <div className="p-4 border-t border-slate-200 dark:border-slate-700">
                             <button className="w-full text-sm text-blue-600 dark:text-blue-400 hover:underline">
@@ -325,7 +387,7 @@ export function MPesaSettings() {
                             <div>
                                 <p className="font-medium text-green-800 dark:text-green-300">M-Pesa Connected</p>
                                 <p className="text-sm text-green-600 dark:text-green-400">
-                                    Last sync: {MPESA_STATS.lastSync}
+                                    Last sync: {stats.lastSync ? new Date(stats.lastSync).toLocaleString() : 'Never'}
                                 </p>
                             </div>
                         </div>

@@ -132,73 +132,15 @@ export const tenantApi = {
 
     // Get single operator
     getOperator: async (id: string): Promise<Operator> => {
-        // Mock implementation for demo if API fails
-        try {
-            const response = await api.get<Operator>(`/tenant/operators/${id}`);
-            return response.data;
-        } catch (error) {
-            console.warn("API fail, using mock data for operator");
-            return {
-                id,
-                name: "John Admin",
-                email: "john@isp.com",
-                role: "ADMIN",
-                status: "ACTIVE",
-                addedPermissions: [],
-                removedPermissions: [],
-                createdAt: new Date().toISOString(),
-                password: "password123", // Mock password
-            };
-        }
+        const response = await api.get<Operator>(`/tenant/operators/${id}`);
+        return response.data;
     },
 
     // Get operator logs
     getOperatorLogs: async (id: string, page = 1, pageSize = 20): Promise<OperatorLogsResponse> => {
         const params = new URLSearchParams({ page: page.toString(), pageSize: pageSize.toString() });
-        try {
-            const response = await api.get<OperatorLogsResponse>(`/tenant/operators/${id}/logs?${params}`);
-            return response.data;
-        } catch (error) {
-            console.warn("API fail, returning mock logs");
-            // Mock data for logs
-            const actions = [
-                { action: "MAC_RESET", targetType: "PPPOE USER", format: (name: string) => `Mac reset for ${name}` },
-                { action: "CUSTOMER_CREATE", targetType: "CUSTOMER", format: (name: string) => `Created new customer account: ${name}` },
-                { action: "PAYMENT_PROCESS", targetType: "INVOICE", format: (name: string) => `Processed payment for invoice #${name}` },
-                { action: "ROUTER_REBOOT", targetType: "ROUTER", format: (name: string) => `Initiated reboot for router: ${name}` },
-                { action: "PACKAGE_CHANGE", targetType: "PPPOE USER", format: (name: string) => `Changed package to 10Mbps for ${name}` },
-                { action: "MANUAL_RECHARGE", targetType: "PPPOE USER", format: (name: string) => `Manual account recharge of KES 1,000 for ${name}` },
-                { action: "EXPIRY_UPDATE", targetType: "PPPOE USER", format: (name: string) => `Manually extended expiry date for ${name}` },
-                { action: "TRANSACTION_RESOLVE", targetType: "PAYMENT", format: (name: string) => `Resolved pending transaction ${name}` },
-                { action: "ACCOUNT_DELETE", targetType: "CUSTOMER", format: (name: string) => `Permanently deleted customer account: ${name}` },
-                { action: "INFO_UPDATE", targetType: "CUSTOMER", format: (name: string) => `Updated profile information for ${name}` }
-            ];
-
-            return {
-                logs: Array.from({ length: 15 }).map((_, i) => {
-                    const type = actions[i % actions.length];
-                    const targetName = type.targetType === "PPPOE USER" ? `user_${100 + i}` :
-                        type.targetType === "INVOICE" ? `INV-${202500 + i}` :
-                            type.targetType === "ROUTER" ? `RB-750-${i}` :
-                                type.targetType === "PAYMENT" ? `TXN-${8800 + i}` :
-                                    `Customer ${i}`;
-
-                    return {
-                        id: `log_${i}`,
-                        action: type.action,
-                        targetType: type.targetType,
-                        targetId: `target_${i}`,
-                        targetName: targetName,
-                        details: type.format(targetName),
-                        timestamp: new Date(Date.now() - i * 3600000 * (i + 1)).toISOString(), // Spread out over time
-                        ipAddress: "192.168.1.1"
-                    };
-                }),
-                total: 15,
-                page,
-                pageSize
-            };
-        }
+        const response = await api.get<OperatorLogsResponse>(`/tenant/operators/${id}/logs?${params}`);
+        return response.data;
     },
 
     // Add operator

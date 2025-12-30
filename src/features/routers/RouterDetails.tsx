@@ -61,34 +61,8 @@ export function RouterDetails() {
             setRouter(data);
         } catch (error) {
             console.error("Failed to load router details:", error);
-            // Demo data fallback
-            setRouter({
-                id: id,
-                name: "MikroTik1",
-                boardName: "CCR2004-1G-12S+2XS",
-                ipAddress: "192.168.1.1",
-                secret: "••••••••",
-                coaPort: 3799,
-                status: "OFFLINE",
-                provisioningStatus: "Command Pending",
-                vpnTunnelIp: "10.255.255.2",
-                routerOsVersion: "7.10",
-                model: "CCR2004-1G-12S+2XS",
-                serialNumber: "ABC123456789",
-                cpuLoad: 15,
-                memoryUsage: 256,
-                memoryTotal: 1024,
-                uptime: "5d 12h 30m",
-                pppoeCount: 45,
-                hotspotCount: 12,
-                remoteWinboxPort: 8291,
-                remoteWinboxEnabled: true,
-                apiUsername: "admin",
-                apiPort: 8728,
-                lastSeen: new Date(Date.now() - 3600000).toISOString(),
-                createdAt: "2025-01-01T00:00:00Z",
-                updatedAt: new Date().toISOString()
-            });
+            toast.error("Failed to load router details");
+            setRouter(null);
         } finally {
             setLoading(false);
         }
@@ -102,21 +76,7 @@ export function RouterDetails() {
             setLiveStatus(status);
         } catch (error) {
             console.error("Failed to fetch live status:", error);
-            // Demo data
-            setLiveStatus({
-                id: id,
-                status: "OFFLINE",
-                uptime: "5d 12h 30m",
-                lastSeen: new Date(Date.now() - 3600000).toISOString(),
-                cpuLoad: 15,
-                memoryUsage: 256,
-                memoryTotal: 1024,
-                activeSessions: {
-                    pppoe: 45,
-                    hotspot: 12,
-                    total: 57
-                }
-            });
+            setLiveStatus(null);
         } finally {
             setRefreshing(false);
         }
@@ -171,42 +131,14 @@ export function RouterDetails() {
         setLoadingSessions(true);
 
         try {
-            // In a real implementation this would fetch from API
-            // const sessions = await nasApi.getActiveSessions(router.id, type === 'all' ? undefined : type);
-
-            // For DEMO purposes, we'll generate fake sessions if API fails or returns empty
-            let sessions: ActiveSession[] = [];
-
-            try {
-                if (router) {
-                    const apiSessions = await nasApi.getActiveSessions(router.id, type === 'all' ? undefined : type);
-                    if (apiSessions && apiSessions.length > 0) {
-                        sessions = apiSessions;
-                    }
-                }
-            } catch (e) {
-                console.log("Failed to fetch sessions from API, using demo data");
+            if (router) {
+                const sessions = await nasApi.getActiveSessions(router.id, type === 'all' ? undefined : type);
+                setActiveSessions(sessions || []);
             }
-
-            // Fallback demo data
-            if (sessions.length === 0) {
-                const count = type === 'pppoe' ? 15 : type === 'hotspot' ? 8 : 23;
-                sessions = Array.from({ length: count }).map((_, i) => ({
-                    id: `sess-${i}`,
-                    username: type === 'pppoe' ? `pppoe_user_${i + 1}` : type === 'hotspot' ? `guest_user_${i + 1}` : i % 2 === 0 ? `pppoe_user_${i}` : `guest_user_${i}`,
-                    ipAddress: `192.168.88.${100 + i}`,
-                    macAddress: `00:11:22:33:44:${i.toString(16).padStart(2, '0')}`,
-                    uptime: `${Math.floor(Math.random() * 24)}h ${Math.floor(Math.random() * 60)}m`,
-                    type: type === 'all' ? (i % 2 === 0 ? 'pppoe' : 'hotspot') : type,
-                    bytesIn: Math.floor(Math.random() * 1000000000),
-                    bytesOut: Math.floor(Math.random() * 5000000000),
-                }));
-            }
-
-            setActiveSessions(sessions);
         } catch (error) {
-            console.error("Failed to fetch sessions", error);
+            console.error("Failed to fetch sessions:", error);
             toast.error("Failed to load active sessions");
+            setActiveSessions([]);
         } finally {
             setLoadingSessions(false);
         }

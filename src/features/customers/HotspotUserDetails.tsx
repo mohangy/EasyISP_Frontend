@@ -134,56 +134,8 @@ export function HotspotUserDetails() {
             // setMpesaTransactions(transactions.mpesaTransactions);
         } catch (error) {
             console.error("Failed to load user:", error);
-            // Mock data fallback
-            setUser({
-                id: id,
-                username: "TLQBU2595H",
-                name: "Hotspot Guest",
-                phone: "254724549154",
-                connectionType: "HOTSPOT",
-                status: "ACTIVE",
-                packageId: "pkg-1",
-                package: { id: "pkg-1", name: "5 gb for 1 day", price: 20 },
-                nasId: "nas-1",
-                nas: { id: "nas-1", name: "5009" },
-                expiresAt: "2025-12-27T00:02:00Z",
-                macAddress: "4A:3F:4D:E5:F0:17",
-                ipAddress: "172.16.0.240",
-                createdAt: "2025-12-26T00:02:52Z",
-                updatedAt: "2025-12-26T00:02:52Z",
-                isOnline: true,
-                dataUsed: 0,
-                dataLimit: 5120,
-                registeredAt: "2025-12-26T00:02:52Z",
-                accountingStartTime: "2025-12-26T00:02:53Z",
-                uptime: "38min18s",
-                hostName: "OPPO-A16k",
-            });
-            setMpesaTransactions([
-                { id: "t1", trxDate: "2025-12-26T00:02:00Z", trxCode: "TLQBU2595H", paybill: "247247", amount: 20, phone: "254724549154" },
-                { id: "t2", trxDate: "2025-12-25T01:58:00Z", trxCode: "TLPBU22326", paybill: "247247", amount: 10, phone: "254724549154" },
-                { id: "t3", trxDate: "2025-12-24T01:54:00Z", trxCode: "TLOBU1Y9YG", paybill: "247247", amount: 10, phone: "254724549154" },
-                { id: "t4", trxDate: "2025-12-21T18:51:00Z", trxCode: "TLLBU1QCHE", paybill: "247247", amount: 20, phone: "254724549154" },
-                { id: "t5", trxDate: "2025-12-21T01:40:00Z", trxCode: "TLLBU1O66E", paybill: "247247", amount: 20, phone: "254724549154" },
-                { id: "t6", trxDate: "2025-12-20T12:59:00Z", trxCode: "TLKBU1KP59", paybill: "247247", amount: 20, phone: "254724549154" },
-                { id: "t7", trxDate: "2025-12-17T23:22:00Z", trxCode: "TLHBU1E1DC", paybill: "247247", amount: 20, phone: "254724549154" },
-                { id: "t8", trxDate: "2025-12-16T22:07:00Z", trxCode: "TLGBU1AJBS", paybill: "247247", amount: 20, phone: "254724549154" },
-                { id: "t9", trxDate: "2025-12-15T20:37:00Z", trxCode: "TLFBU16Z4R", paybill: "247247", amount: 20, phone: "254724549154" },
-                { id: "t10", trxDate: "2025-12-14T19:43:00Z", trxCode: "TLEBU13CGQ", paybill: "247247", amount: 20, phone: "254724549154" },
-                { id: "t11", trxDate: "2025-12-13T18:30:00Z", trxCode: "TLDBU12ABC", paybill: "247247", amount: 20, phone: "254724549154" },
-                { id: "t12", trxDate: "2025-12-12T17:15:00Z", trxCode: "TLCBU11XYZ", paybill: "247247", amount: 20, phone: "254724549154" },
-            ]);
-            // Mock connection logs
-            setConnectionLogs([
-                {
-                    id: "log1",
-                    timestamp: "2025-12-26T00:02:00Z",
-                    nasInfo: "FASTNET MAZERAS RB5009 - 100.106.0.12",
-                    authReply: "Access-Accept",
-                    password: "TLQBU2595H",
-                    mac: "4A:3F:4D:E5:F0:17"
-                }
-            ]);
+            toast.error("Failed to load user details");
+            navigate("/customers/hotspot");
         } finally {
             setLoading(false);
         }

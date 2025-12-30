@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import L from "leaflet";
 import { Search, Loader2, X, Server, Users, Wifi, WifiOff, MapPinned, RefreshCw, Link2, ExternalLink } from "lucide-react";
 import { customerApi, type Customer } from "../../services/customerService";
+import api from "../../services/api";
 import { usePermissions } from "../../hooks/usePermissions"; // Added permission hook
 import { PERMISSIONS } from "../../lib/permissions"; // Added permissions constant
 import "leaflet/dist/leaflet.css";
@@ -184,71 +185,44 @@ export function CustomerMap() {
     const loadData = async () => {
         try {
             setLoading(true);
-            // Load customers with real-time online status from RADIUS
-            const pppoeResponse = await customerApi.getCustomersWithLiveStatus({ connectionType: "PPPOE", pageSize: 500 });
-            setCustomers(pppoeResponse.customers);
+            // Load map data from API (customers and routers with coordinates)
+            const { data } = await api.get('/map/data');
 
-            // TODO: Load routers from API
-            // For now, use mock router data
-            setRouters([
-                { id: "r1", name: "Main Router - CBD", identity: "MikroTik-CBD", model: "CCR2004-1G-12S+2XS", ipAddress: "192.168.88.1", vpnIpAddress: "10.10.0.1", location: "Mombasa CBD", latitude: -4.0435, longitude: 39.6682, status: "ONLINE", uptime: "45d 12h 30m", type: "ROUTER", customersCount: 45, pppoeActiveCount: 38, hotspotActiveCount: 12, webfigUrl: "https://192.168.88.1", winboxPort: 8291 },
-                { id: "r2", name: "Nyali Router", identity: "MikroTik-Nyali", model: "hAP ac³", ipAddress: "192.168.88.2", vpnIpAddress: "10.10.0.2", location: "Nyali", latitude: -4.0250, longitude: 39.7050, status: "ONLINE", uptime: "12d 8h 15m", type: "ROUTER", customersCount: 32, pppoeActiveCount: 24, hotspotActiveCount: 8, webfigUrl: "https://192.168.88.2", winboxPort: 8291 },
-                { id: "r3", name: "Likoni Router", identity: "MikroTik-Likoni", model: "RB4011iGS+", ipAddress: "192.168.88.3", vpnIpAddress: "10.10.0.3", location: "Likoni", latitude: -4.0850, longitude: 39.6550, status: "OFFLINE", lastSeen: "2h ago", type: "ROUTER", customersCount: 28, pppoeActiveCount: 0, hotspotActiveCount: 0, webfigUrl: "https://192.168.88.3", winboxPort: 8291 },
-                { id: "r4", name: "Bamburi Router", identity: "MikroTik-Bamburi", model: "CCR1009-7G-1C-1S+", ipAddress: "192.168.88.4", vpnIpAddress: "10.10.0.4", location: "Bamburi", latitude: -3.9950, longitude: 39.7200, status: "ONLINE", uptime: "30d 5h 45m", type: "ROUTER", customersCount: 51, pppoeActiveCount: 42, hotspotActiveCount: 15, webfigUrl: "https://192.168.88.4", winboxPort: 8291 },
-            ]);
+            // Transform customers from API response
+            const mappedCustomers = data.customers.map((c: any) => ({
+                id: c.id,
+                username: c.username,
+                name: c.name,
+                connectionType: c.connectionType?.toUpperCase() || "PPPOE",
+                status: c.status?.toUpperCase() || "ACTIVE",
+                isOnline: c.status === 'active',
+                location: c.location,
+                latitude: c.latitude,
+                longitude: c.longitude,
+                ipAddress: c.ipAddress,
+                createdAt: "",
+                updatedAt: "",
+            }));
+            setCustomers(mappedCustomers);
+
+            // Transform routers from API response
+            const mappedRouters: Router[] = data.routers.map((r: any) => ({
+                id: r.id,
+                name: r.name,
+                ipAddress: r.ipAddress,
+                status: r.status?.toUpperCase() || "UNKNOWN",
+                type: "ROUTER" as const,
+                latitude: r.latitude,
+                longitude: r.longitude,
+                location: r.location,
+                customersCount: r.customerCount || 0,
+            }));
+            setRouters(mappedRouters);
         } catch (error) {
-            console.error("Failed to load data:", error);
-            // Mock customer data with coordinates around Mombasa
-            setCustomers([
-                // Mombasa CBD area
-                { id: "1", username: "0711234567", name: "John Doe", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Mombasa CBD", latitude: -4.0500, longitude: 39.6667, ipAddress: "192.168.1.100", createdAt: "", updatedAt: "" },
-                { id: "2", username: "0711234568", name: "Alice Mwende", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Mombasa CBD", latitude: -4.0480, longitude: 39.6690, ipAddress: "192.168.1.101", createdAt: "", updatedAt: "" },
-                { id: "3", username: "0711234569", name: "David Kamau", connectionType: "PPPOE", status: "ACTIVE", isOnline: false, location: "Old Town", latitude: -4.0620, longitude: 39.6780, ipAddress: "192.168.1.102", createdAt: "", updatedAt: "" },
-
-                // Nyali area
-                { id: "4", username: "0722345678", name: "Jane Smith", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Nyali Beach", latitude: -4.0300, longitude: 39.7100, ipAddress: "192.168.1.110", createdAt: "", updatedAt: "" },
-                { id: "5", username: "0722345679", name: "Brian Omondi", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Nyali Centre", latitude: -4.0350, longitude: 39.7050, ipAddress: "192.168.1.111", createdAt: "", updatedAt: "" },
-                { id: "6", username: "0722345680", name: "Grace Wambui", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Nyali Cinemax", latitude: -4.0280, longitude: 39.7020, ipAddress: "192.168.1.112", createdAt: "", updatedAt: "" },
-                { id: "7", username: "0722345681", name: "Kevin Njoroge", connectionType: "PPPOE", status: "SUSPENDED", isOnline: false, location: "Links Road", latitude: -4.0320, longitude: 39.7080, ipAddress: "192.168.1.113", createdAt: "", updatedAt: "" },
-
-                // Likoni area
-                { id: "8", username: "0733456789", name: "Peter Ochieng", connectionType: "PPPOE", status: "ACTIVE", isOnline: false, location: "Likoni", latitude: -4.0800, longitude: 39.6500, ipAddress: "192.168.1.120", createdAt: "", updatedAt: "" },
-                { id: "9", username: "0733456790", name: "Sarah Akinyi", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Likoni Ferry", latitude: -4.0750, longitude: 39.6580, ipAddress: "192.168.1.121", createdAt: "", updatedAt: "" },
-                { id: "10", username: "0733456791", name: "James Mutua", connectionType: "PPPOE", status: "EXPIRED", isOnline: false, location: "Shelly Beach", latitude: -4.0900, longitude: 39.6620, ipAddress: "192.168.1.122", createdAt: "", updatedAt: "" },
-
-                // Kisauni area
-                { id: "11", username: "0744567890", name: "Mary Wanjiku", connectionType: "PPPOE", status: "EXPIRED", isOnline: false, location: "Kisauni", latitude: -4.0100, longitude: 39.6900, ipAddress: "192.168.1.130", createdAt: "", updatedAt: "" },
-                { id: "12", username: "0744567891", name: "Joseph Karanja", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Kongowea", latitude: -4.0150, longitude: 39.6850, ipAddress: "192.168.1.131", createdAt: "", updatedAt: "" },
-                { id: "13", username: "0744567892", name: "Lucy Muthoni", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Bombolulu", latitude: -4.0050, longitude: 39.6950, ipAddress: "192.168.1.132", createdAt: "", updatedAt: "" },
-
-                // Bamburi area
-                { id: "14", username: "0755678901", name: "Michael Otieno", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Bamburi Beach", latitude: -3.9900, longitude: 39.7300, ipAddress: "192.168.1.140", createdAt: "", updatedAt: "" },
-                { id: "15", username: "0755678902", name: "Nancy Chebet", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Bamburi Mtambo", latitude: -3.9950, longitude: 39.7200, ipAddress: "192.168.1.141", createdAt: "", updatedAt: "" },
-                { id: "16", username: "0755678903", name: "Samuel Kiprop", connectionType: "PPPOE", status: "ACTIVE", isOnline: false, location: "Mombasa Cement", latitude: -3.9850, longitude: 39.7250, ipAddress: "192.168.1.142", createdAt: "", updatedAt: "" },
-                { id: "17", username: "0755678904", name: "Elizabeth Wafula", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Shanzu", latitude: -3.9750, longitude: 39.7350, ipAddress: "192.168.1.143", createdAt: "", updatedAt: "" },
-
-                // Mtwapa area
-                { id: "18", username: "0766789012", name: "Robert Kimani", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Mtwapa", latitude: -3.9500, longitude: 39.7400, ipAddress: "192.168.1.150", createdAt: "", updatedAt: "" },
-                { id: "19", username: "0766789013", name: "Patricia Auma", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Mtwapa Creek", latitude: -3.9550, longitude: 39.7350, ipAddress: "192.168.1.151", createdAt: "", updatedAt: "" },
-                { id: "20", username: "0766789014", name: "Charles Odhiambo", connectionType: "PPPOE", status: "SUSPENDED", isOnline: false, location: "Kanamai", latitude: -3.9400, longitude: 39.7450, ipAddress: "192.168.1.152", createdAt: "", updatedAt: "" },
-
-                // Port Reitz area
-                { id: "21", username: "0777890123", name: "Christine Nzisa", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Port Reitz", latitude: -4.0700, longitude: 39.6300, ipAddress: "192.168.1.160", createdAt: "", updatedAt: "" },
-                { id: "22", username: "0777890124", name: "Daniel Gitau", connectionType: "PPPOE", status: "ACTIVE", isOnline: false, location: "Changamwe", latitude: -4.0550, longitude: 39.6400, ipAddress: "192.168.1.161", createdAt: "", updatedAt: "" },
-                { id: "23", username: "0777890125", name: "Faith Nduta", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Mikindani", latitude: -4.0600, longitude: 39.6350, ipAddress: "192.168.1.162", createdAt: "", updatedAt: "" },
-
-                // Tudor area
-                { id: "24", username: "0788901234", name: "George Mbugua", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Tudor", latitude: -4.0400, longitude: 39.6750, ipAddress: "192.168.1.170", createdAt: "", updatedAt: "" },
-                { id: "25", username: "0788901235", name: "Helen Njeri", connectionType: "PPPOE", status: "ACTIVE", isOnline: true, location: "Makupa", latitude: -4.0450, longitude: 39.6600, ipAddress: "192.168.1.171", createdAt: "", updatedAt: "" },
-            ]);
-            setRouters([
-                { id: "r1", name: "Main Router - CBD", ipAddress: "192.168.88.1", location: "Mombasa CBD", latitude: -4.0435, longitude: 39.6682, status: "ONLINE", type: "ROUTER", customersCount: 45 },
-                { id: "r2", name: "Nyali Router", ipAddress: "192.168.88.2", location: "Nyali", latitude: -4.0250, longitude: 39.7050, status: "ONLINE", type: "ROUTER", customersCount: 32 },
-                { id: "r3", name: "Likoni Router", ipAddress: "192.168.88.3", location: "Likoni", latitude: -4.0850, longitude: 39.6550, status: "OFFLINE", type: "ROUTER", customersCount: 28 },
-                { id: "r4", name: "Bamburi Router", ipAddress: "192.168.88.4", location: "Bamburi", latitude: -3.9900, longitude: 39.7250, status: "ONLINE", type: "ROUTER", customersCount: 51 },
-                { id: "r5", name: "Mtwapa Router", ipAddress: "192.168.88.5", location: "Mtwapa", latitude: -3.9520, longitude: 39.7380, status: "ONLINE", type: "ROUTER", customersCount: 38 },
-                { id: "r6", name: "Changamwe Router", ipAddress: "192.168.88.6", location: "Changamwe", latitude: -4.0580, longitude: 39.6380, status: "ONLINE", type: "ROUTER", customersCount: 29 },
-            ]);
+            console.error("Failed to load map data:", error);
+            // Show empty state on error - no mock data
+            setCustomers([]);
+            setRouters([]);
         } finally {
             setLoading(false);
         }

@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Info } from "lucide-react";
+import { X, Info, Loader2 } from "lucide-react";
+import { nasApi } from "../../services/nasService";
 
 interface HotspotPackageFormProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: any) => void;
     initialData?: any;
+}
+
+interface Router {
+    id: string;
+    name: string;
 }
 
 export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: HotspotPackageFormProps) {
@@ -23,6 +29,24 @@ export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: H
 
     const [formData, setFormData] = useState(defaultState);
     const [showDataLimit, setShowDataLimit] = useState(false);
+    const [routers, setRouters] = useState<Router[]>([]);
+    const [loadingRouters, setLoadingRouters] = useState(false);
+
+    // Fetch routers from API
+    useEffect(() => {
+        if (isOpen) {
+            setLoadingRouters(true);
+            nasApi.getRouters({ pageSize: 100 })
+                .then(response => {
+                    setRouters(response.routers.map(r => ({ id: r.id, name: `${r.name}-${r.ipAddress}` })));
+                })
+                .catch(err => {
+                    console.error("Failed to load routers:", err);
+                    setRouters([]);
+                })
+                .finally(() => setLoadingRouters(false));
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (isOpen) {
@@ -44,13 +68,6 @@ export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: H
             }
         }
     }, [isOpen, initialData]);
-
-    // Mock routers for selection
-    const routers = [
-        { id: "r1", name: "5009-100.106.0.12" },
-        { id: "r2", name: "Aziz Haplite Mzeras-100.106.0.200" },
-        { id: "r3", name: "ccr2004-100.106.1.158" },
-    ];
 
     if (!isOpen) return null;
 
@@ -217,23 +234,32 @@ export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: H
                         </div>
 
                         <div className="space-y-2 max-h-32 overflow-y-auto">
-                            {routers.map(router => (
-                                <label key={router.id} className="flex items-center gap-3 cursor-pointer group">
-                                    <div className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${formData.routerIds.includes(router.id)
-                                        ? 'bg-cyan-500 border-cyan-500'
-                                        : 'border-slate-600 group-hover:border-slate-500'
-                                        }`}>
-                                        {formData.routerIds.includes(router.id) && <span className="text-white text-xs">✓</span>}
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        className="hidden"
-                                        checked={formData.routerIds.includes(router.id)}
-                                        onChange={() => toggleRouter(router.id)}
-                                    />
-                                    <span className="text-slate-300 text-sm">{router.name}</span>
-                                </label>
-                            ))}
+                            {loadingRouters ? (
+                                <div className="flex items-center justify-center py-4">
+                                    <Loader2 className="w-5 h-5 animate-spin text-cyan-500" />
+                                    <span className="ml-2 text-sm text-slate-400">Loading routers...</span>
+                                </div>
+                            ) : routers.length === 0 ? (
+                                <p className="text-sm text-slate-500">No routers available</p>
+                            ) : (
+                                routers.map(router => (
+                                    <label key={router.id} className="flex items-center gap-3 cursor-pointer group">
+                                        <div className={`w-5 h-5 border rounded flex items-center justify-center transition-colors ${formData.routerIds.includes(router.id)
+                                            ? 'bg-cyan-500 border-cyan-500'
+                                            : 'border-slate-600 group-hover:border-slate-500'
+                                            }`}>
+                                            {formData.routerIds.includes(router.id) && <span className="text-white text-xs">✓</span>}
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            className="hidden"
+                                            checked={formData.routerIds.includes(router.id)}
+                                            onChange={() => toggleRouter(router.id)}
+                                        />
+                                        <span className="text-slate-300 text-sm">{router.name}</span>
+                                    </label>
+                                ))
+                            )}
                         </div>
                     </div>
 
