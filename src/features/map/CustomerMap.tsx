@@ -285,37 +285,22 @@ export function CustomerMap() {
         }
     };
 
-    // Refresh single customer status
+    // Refresh single customer status from live MikroTik/RADIUS data
     const refreshCustomer = async (customerId: string) => {
         setRefreshingCustomer(customerId);
         try {
-            // TODO: Call API to check if customer is online
-            // const sessions = await customerApi.getActiveRadiusSessions();
-            // For now, simulate refresh with mock data
-            await new Promise(resolve => setTimeout(resolve, 800));
+            // Call API to get real customer live status
+            const liveStatus = await customerApi.getLiveStatus(customerId);
 
-            // Generate random uptime for demo
-            const generateUptime = () => {
-                const h = Math.floor(Math.random() * 24);
-                const m = Math.floor(Math.random() * 60);
-                const s = Math.floor(Math.random() * 60);
-                return `${h}h ${m}m ${s}s`;
-            };
-
-            const generateLastSeen = () => {
-                const mins = Math.floor(Math.random() * 120);
-                return mins < 60 ? `${mins}m ago` : `${Math.floor(mins / 60)}h ${mins % 60}m ago`;
-            };
-
-            // Toggle online status for demo (in production, get real status)
+            // Update customer in the list
             setCustomers(prev => prev.map(c => {
                 if (c.id === customerId) {
-                    const newOnlineStatus = !c.isOnline;
                     return {
                         ...c,
-                        isOnline: newOnlineStatus,
-                        sessionUptime: newOnlineStatus ? generateUptime() : undefined,
-                        lastSeenAgo: !newOnlineStatus ? generateLastSeen() : undefined
+                        isOnline: liveStatus.isOnline,
+                        ipAddress: liveStatus.ipAddress || c.ipAddress,
+                        sessionUptime: liveStatus.uptime,
+                        lastSeenAgo: liveStatus.lastSeenAgo
                     };
                 }
                 return c;
@@ -325,19 +310,19 @@ export function CustomerMap() {
             if (selectedItem?.type === "CUSTOMER" && (selectedItem as MapCustomer).id === customerId) {
                 setSelectedItem(prev => {
                     if (prev?.type === "CUSTOMER") {
-                        const newOnlineStatus = !(prev as MapCustomer).isOnline;
                         return {
                             ...prev,
-                            isOnline: newOnlineStatus,
-                            sessionUptime: newOnlineStatus ? generateUptime() : undefined,
-                            lastSeenAgo: !newOnlineStatus ? generateLastSeen() : undefined
+                            isOnline: liveStatus.isOnline,
+                            ipAddress: liveStatus.ipAddress || (prev as MapCustomer).ipAddress,
+                            sessionUptime: liveStatus.uptime,
+                            lastSeenAgo: liveStatus.lastSeenAgo
                         };
                     }
                     return prev;
                 });
             }
         } catch (error) {
-            console.error("Failed to refresh customer:", error);
+            console.error("Failed to refresh customer status:", error);
         } finally {
             setRefreshingCustomer(null);
         }
