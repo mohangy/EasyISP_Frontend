@@ -199,7 +199,9 @@ export function CustomerMap() {
                 location: c.location,
                 latitude: c.latitude,
                 longitude: c.longitude,
-                ipAddress: c.ipAddress,
+                ipAddress: c.ipAddress || null,
+                package: c.package || null,
+                expiresAt: c.expiresAt || null,
                 createdAt: "",
                 updatedAt: "",
             }));
