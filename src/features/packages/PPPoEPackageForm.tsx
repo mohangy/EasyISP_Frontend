@@ -13,7 +13,8 @@ export function PPPoEPackageForm({ isOpen, onClose, onSubmit, initialData }: PPP
     const defaultState = {
         name: "",
         price: "",
-        bandwidth: ""
+        downloadSpeed: "",
+        uploadSpeed: ""
     };
 
     const [formData, setFormData] = useState(defaultState);
@@ -24,7 +25,8 @@ export function PPPoEPackageForm({ isOpen, onClose, onSubmit, initialData }: PPP
                 setFormData({
                     name: initialData.name || "",
                     price: initialData.price?.toString() || "",
-                    bandwidth: initialData.downloadSpeed?.toString() || initialData.bandwidth || ""
+                    downloadSpeed: initialData.downloadSpeed?.toString() || "",
+                    uploadSpeed: initialData.uploadSpeed?.toString() || ""
                 });
             } else {
                 setFormData(defaultState);
@@ -36,7 +38,13 @@ export function PPPoEPackageForm({ isOpen, onClose, onSubmit, initialData }: PPP
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({ ...formData, type: "PPPOE" });
+        onSubmit({
+            ...formData,
+            type: "PPPOE",
+            price: parseFloat(formData.price),
+            downloadSpeed: parseInt(formData.downloadSpeed),
+            uploadSpeed: parseInt(formData.uploadSpeed)
+        });
     };
 
     return createPortal(
@@ -85,21 +93,34 @@ export function PPPoEPackageForm({ isOpen, onClose, onSubmit, initialData }: PPP
                         />
                     </div>
 
-                    {/* Bandwidth */}
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                            <Info className="w-4 h-4 text-cyan-500" />
+                    {/* Bandwidth (Speeds) */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 uppercase">
-                                BANDWIDTH (INTERNET SPEED) LIMIT (UPLOAD/DOWNLOAD)
+                                DOWNLOAD SPEED (MBPS)<span className="text-red-500">*</span>
                             </label>
+                            <input
+                                type="number"
+                                className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+                                placeholder="e.g 10"
+                                value={formData.downloadSpeed}
+                                onChange={e => setFormData({ ...formData, downloadSpeed: e.target.value })}
+                                required
+                            />
                         </div>
-                        <input
-                            type="text"
-                            className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
-                            placeholder="5M"
-                            value={formData.bandwidth}
-                            onChange={e => setFormData({ ...formData, bandwidth: e.target.value })}
-                        />
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-400 uppercase">
+                                UPLOAD SPEED (MBPS)<span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+                                placeholder="e.g 5"
+                                value={formData.uploadSpeed}
+                                onChange={e => setFormData({ ...formData, uploadSpeed: e.target.value })}
+                                required
+                            />
+                        </div>
                     </div>
 
                     {/* Actions */}

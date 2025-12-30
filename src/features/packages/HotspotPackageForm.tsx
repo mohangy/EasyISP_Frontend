@@ -19,7 +19,8 @@ export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: H
     const defaultState = {
         name: "",
         price: "",
-        bandwidth: "",
+        downloadSpeed: "",
+        uploadSpeed: "",
         sessionTime: "",
         sessionTimeUnit: "HOURS",
         dataLimit: "",
@@ -54,7 +55,8 @@ export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: H
                 setFormData({
                     name: initialData.name || "",
                     price: initialData.price?.toString() || "",
-                    bandwidth: initialData.downloadSpeed?.toString() || "",
+                    downloadSpeed: initialData.downloadSpeed?.toString() || "",
+                    uploadSpeed: initialData.uploadSpeed?.toString() || "",
                     sessionTime: initialData.sessionTime?.toString() || "",
                     sessionTimeUnit: initialData.sessionTimeUnit || "HOURS",
                     dataLimit: initialData.dataLimit?.toString() || "",
@@ -73,7 +75,15 @@ export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: H
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({ ...formData, type: "HOTSPOT" });
+        onSubmit({
+            ...formData,
+            type: "HOTSPOT",
+            price: parseFloat(formData.price),
+            downloadSpeed: parseInt(formData.downloadSpeed),
+            uploadSpeed: parseInt(formData.uploadSpeed),
+            sessionTime: formData.sessionTime ? parseInt(formData.sessionTime) : undefined,
+            dataLimit: formData.dataLimit ? parseInt(formData.dataLimit) : undefined
+        });
     };
 
     const toggleRouter = (id: string) => {
@@ -131,21 +141,34 @@ export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: H
                         />
                     </div>
 
-                    {/* Bandwidth */}
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                            <Info className="w-4 h-4 text-cyan-500" />
+                    {/* Bandwidth (Speeds) */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 uppercase">
-                                BANDWIDTH (INTERNET SPEED) LIMIT (UPLOAD/DOWNLOAD)
+                                DOWNLOAD SPEED (MBPS)<span className="text-red-500">*</span>
                             </label>
+                            <input
+                                type="number"
+                                className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+                                placeholder="e.g 8"
+                                value={formData.downloadSpeed}
+                                onChange={e => setFormData({ ...formData, downloadSpeed: e.target.value })}
+                                required
+                            />
                         </div>
-                        <input
-                            type="text"
-                            className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
-                            placeholder="8M"
-                            value={formData.bandwidth}
-                            onChange={e => setFormData({ ...formData, bandwidth: e.target.value })}
-                        />
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-400 uppercase">
+                                UPLOAD SPEED (MBPS)<span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                className="w-full px-4 py-2.5 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+                                placeholder="e.g 4"
+                                value={formData.uploadSpeed}
+                                onChange={e => setFormData({ ...formData, uploadSpeed: e.target.value })}
+                                required
+                            />
+                        </div>
                     </div>
 
                     {/* Session Time */}

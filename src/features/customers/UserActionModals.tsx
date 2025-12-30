@@ -744,8 +744,13 @@ export function AddHotspotUserModal({
             setPages(1);
             setVouchersPerPage(21);
             setPackageId("");
+            setPackageId("");
             customerApi.getPackages("HOTSPOT")
-                .then(setPackages)
+                .then(data => setPackages(data || []))
+                .catch(err => {
+                    console.error(err);
+                    setPackages([]);
+                })
                 .finally(() => setLoading(false));
         }
     }, [isOpen]);
@@ -847,7 +852,7 @@ export function AddHotspotUserModal({
                         className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-200 focus:outline-none focus:border-cyan-500"
                     >
                         <option value="">{loading ? "Loading packages..." : "Select a package"}</option>
-                        {packages.map(pkg => (
+                        {Array.isArray(packages) && packages.map(pkg => (
                             <option key={pkg.id} value={pkg.id}>
                                 {pkg.name} @ KES {pkg.price}
                             </option>
