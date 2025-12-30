@@ -127,6 +127,26 @@ function FlyToLocation({ position, zoom }: { position: [number, number] | null; 
     return null;
 }
 
+// Helper to calculate uptime string from start date
+const calculateUptime = (startTime: string | Date) => {
+    const start = new Date(startTime);
+    const now = new Date();
+    const diff = now.getTime() - start.getTime(); // diff in ms
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    let uptime = "";
+    if (days > 0) uptime += `${days}d `;
+    if (hours > 0) uptime += `${hours}h `;
+    if (minutes > 0) uptime += `${minutes}m `;
+    uptime += `${seconds}s`;
+
+    return uptime.trim();
+};
+
 export function CustomerMap() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [routers, setRouters] = useState<Router[]>([]);
@@ -195,13 +215,14 @@ export function CustomerMap() {
                 name: c.name,
                 connectionType: c.connectionType?.toUpperCase() || "PPPOE",
                 status: c.status?.toUpperCase() || "ACTIVE",
-                isOnline: c.status === 'active',
+                isOnline: c.isOnline ?? false, // Use real online status from API (based on active RADIUS sessions)
                 location: c.location,
                 latitude: c.latitude,
                 longitude: c.longitude,
                 ipAddress: c.ipAddress || null,
                 package: c.package || null,
                 expiresAt: c.expiresAt || null,
+                sessionUptime: c.sessionStartTime ? calculateUptime(c.sessionStartTime) : undefined,
                 createdAt: "",
                 updatedAt: "",
             }));
