@@ -59,7 +59,7 @@ export function PackageList({ packages, loading }: PackageListProps) {
                                     {pkg.dataLimit ? `${pkg.dataLimit}${pkg.dataLimitUnit}` : '-'}
                                 </td>
                                 <td className="px-4 py-3 text-slate-500 text-xs">
-                                    {pkg.routerIds.length > 0 ? (pkg.routerIds.length > 1 ? 'Multiple' : 'ac') : 'no'}
+                                    {(pkg.routerIds?.length || 0) > 0 ? (pkg.routerIds.length > 1 ? 'Multiple' : 'ac') : 'no'}
                                 </td>
                                 <td className="px-4 py-3 text-slate-400 text-xs">active</td>
                             </tr>

@@ -67,8 +67,8 @@ export function PackageDetails() {
                 ...pkg,
                 name: data.name,
                 price: Number(data.price),
-                downloadSpeed: parseFloat(data.bandwidth) || pkg.downloadSpeed,
-                uploadSpeed: parseFloat(data.bandwidth) || pkg.uploadSpeed,
+                downloadSpeed: Number(data.downloadSpeed) || pkg.downloadSpeed,
+                uploadSpeed: Number(data.uploadSpeed) || pkg.uploadSpeed,
                 // Handle session time & data limits if Hotspot
                 sessionTime: data.sessionTime ? Number(data.sessionTime) : pkg.sessionTime,
                 sessionTimeUnit: data.sessionTimeUnit || pkg.sessionTimeUnit,
@@ -77,7 +77,7 @@ export function PackageDetails() {
                 routerIds: data.routerIds || pkg.routerIds,
             };
 
-            await packageService.updatePackage(updatedData);
+            await packageService.updatePackage(pkg.id, updatedData);
             setPkg(updatedData);
             setIsEditOpen(false);
             toast.success("Package updated successfully");
@@ -319,7 +319,13 @@ export function PackageDetails() {
                         Availability
                     </h3>
 
-                    {pkg.routerIds.length > 0 ? (
+                    {pkg.type === 'PPPOE' || !pkg.routerIds || pkg.routerIds.length === 0 ? (
+                        <p className="text-slate-500 italic">
+                            {pkg.type === 'PPPOE'
+                                ? "Available on all routers (PPPoE default)"
+                                : "This package is available on all hotspot routers."}
+                        </p>
+                    ) : (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {pkg.routerIds.map(rid => (
                                 <div key={rid} className="flex items-center gap-3 p-3 bg-slate-900/50 border border-slate-700 rounded-lg">
@@ -333,8 +339,6 @@ export function PackageDetails() {
                                 </div>
                             ))}
                         </div>
-                    ) : (
-                        <p className="text-slate-500 italic">This package is not assigned to any specific routers (Global).</p>
                     )}
                 </div>
             </div>
