@@ -6,8 +6,11 @@ import toast from "react-hot-toast";
 interface PaymentGateway {
     id: string;
     type: string;
+    subType: 'PAYBILL' | 'BUYGOODS' | 'BANK';
     name: string | null;
     shortcode: string;
+    storeNumber?: string;
+    accountNumber?: string;
     consumerKey?: string;
     consumerSecret?: string;
     passkey: string | null;
@@ -181,6 +184,16 @@ function PaymentGatewayCard({ gateway, onEdit, onDelete, onDefaultSet }: { gatew
                             PPPoE
                         </span>
                     )}
+                    {gateway.subType === 'BUYGOODS' && (
+                        <span className="px-2.5 py-0.5 text-xs font-medium bg-teal-500/20 text-teal-400 rounded-full border border-teal-500/30">
+                            Buy Goods
+                        </span>
+                    )}
+                    {gateway.subType === 'BANK' && (
+                        <span className="px-2.5 py-0.5 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full border border-blue-500/30">
+                            Bank
+                        </span>
+                    )}
                 </div>
                 <div className="flex items-center gap-4 text-sm text-slate-400">
                     <div className="flex items-center gap-1.5">
@@ -244,6 +257,9 @@ function PaymentGatewayForm({ gateway, onCancel, onSave }: { gateway: PaymentGat
     const [formData, setFormData] = useState({
         name: gateway?.name || "",
         shortcode: gateway?.shortcode || "",
+        subType: gateway?.subType || "PAYBILL",
+        storeNumber: gateway?.storeNumber || "",
+        accountNumber: gateway?.accountNumber || "",
         consumerKey: gateway?.consumerKey || "",
         consumerSecret: gateway?.consumerSecret || "",
         passkey: gateway?.passkey || "",
@@ -299,17 +315,77 @@ function PaymentGatewayForm({ gateway, onCancel, onSave }: { gateway: PaymentGat
                             />
                         </div>
 
+                            <input
+                                type="text"
+                                required
+                                value={formData.name}
+                                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                                placeholder="e.g. Main Shop Paybill"
+                            />
+                        </div>
+
                         <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-1.5">Shortcode (Paybill/Till)</label>
+                            <label className="block text-sm font-medium text-slate-400 mb-1.5">Gateway Type</label>
+                            <select
+                                value={formData.subType}
+                                onChange={e => setFormData({ ...formData, subType: e.target.value as any })}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                            >
+                                <option value="PAYBILL">Paybill</option>
+                                <option value="BUYGOODS">Buy Goods (Till Number)</option>
+                                <option value="BANK">M-Pesa to Bank</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-400 mb-1.5">
+                                {formData.subType === 'BUYGOODS' ? 'Till Number' :
+                                 formData.subType === 'BANK' ? 'Bank Paybill Number' :
+                                 'Paybill Number'}
+                            </label>
                             <input
                                 type="text"
                                 required
                                 value={formData.shortcode}
                                 onChange={e => setFormData({ ...formData, shortcode: e.target.value })}
                                 className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
-                                placeholder="e.g. 174379"
+                                placeholder={formData.subType === 'BUYGOODS' ? "e.g. 123456" : "e.g. 247247"}
                             />
                         </div>
+
+                        {formData.subType === 'BUYGOODS' && (
+                            <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                                <label className="block text-sm font-medium text-slate-400 mb-1.5">
+                                    Store Number (Head Office)
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.storeNumber}
+                                    onChange={e => setFormData({ ...formData, storeNumber: e.target.value })}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
+                                    placeholder="e.g. 7760637"
+                                />
+                                <p className="text-xs text-slate-500 mt-1">This is the 'Business Shortcode' used for STK Push initiation.</p>
+                            </div>
+                        )}
+
+                        {formData.subType === 'BANK' && (
+                            <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                                <label className="block text-sm font-medium text-slate-400 mb-1.5">
+                                    Target Bank Account
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.accountNumber}
+                                    onChange={e => setFormData({ ...formData, accountNumber: e.target.value })}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
+                                    placeholder="e.g. 011000..."
+                                />
+                            </div>
+                        )}
 
                         <div>
                             <label className="block text-sm font-medium text-slate-400 mb-1.5">Environment</label>
@@ -427,7 +503,7 @@ function PaymentGatewayForm({ gateway, onCancel, onSave }: { gateway: PaymentGat
                         Cancel
                     </button>
                 </div>
-            </form>
-        </div>
+            </form >
+        </div >
     );
 }
