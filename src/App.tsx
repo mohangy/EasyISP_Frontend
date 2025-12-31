@@ -31,9 +31,12 @@ import { SuperAdminDashboard } from "./features/superAdmin/SuperAdminDashboard";
 import { TenantDetailsPage } from "./features/superAdmin/TenantDetailsPage";
 import { PERMISSIONS } from "./lib/permissions";
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="easyisp-ui-theme">
+      <Toaster position="top-right" />
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
