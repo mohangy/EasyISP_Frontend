@@ -73,7 +73,19 @@ export function Header({ onMenuClick }: HeaderProps) {
     };
 
     const defaultAvatar = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
-    const avatarSrc = user?.profilePicture || defaultAvatar;
+
+    // Profile pictures are stored on the backend, so we need the full backend URL
+    const getProfilePictureUrl = (path: string | undefined) => {
+        if (!path) return defaultAvatar;
+        // If it's already an absolute URL, use it directly
+        if (path.startsWith('http')) return path;
+        // Otherwise, prepend the API base URL (without /api suffix)
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+        const backendBase = apiBase.replace(/\/api$/, '');
+        return `${backendBase}${path}`;
+    };
+
+    const avatarSrc = getProfilePictureUrl(user?.profilePicture);
 
     return (
         <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-4 md:px-6 bg-white/95 dark:bg-slate-900/95 md:bg-white/80 md:dark:bg-slate-900/80 md:backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
