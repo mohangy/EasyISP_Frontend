@@ -160,9 +160,52 @@ export const tenantApi = {
         await api.delete(`/tenant/operators/${id}`);
     },
 
-    // Update payment gateway
-    updatePaymentGateway: async (data: { type: string; config: Record<string, string> }): Promise<void> => {
-        await api.put("/tenant/payment-gateway", data);
+    // Payment Gateways
+    getPaymentGateways: async () => {
+        const response = await api.get("/payment-gateways");
+        return response.data;
+    },
+    createPaymentGateway: async (data: any) => {
+        const response = await api.post("/payment-gateways", data);
+        return response.data;
+    },
+    updatePaymentGateway: async (id: string, data: any) => {
+        const response = await api.put(`/payment-gateways/${id}`, data);
+        return response.data;
+    },
+    deletePaymentGateway: async (id: string) => {
+        await api.delete(`/payment-gateways/${id}`);
+    },
+    setPaymentGatewayDefault: async (id: string) => {
+        await api.post(`/payment-gateways/${id}/default`);
+    },
+    testPaymentGateway: async (id: string) => {
+        const response = await api.post(`/payment-gateways/${id}/test`);
+        return response.data;
+    },
+
+    // SMS Gateways
+    getSmsGateways: async () => {
+        const response = await api.get("/sms-gateways");
+        return response.data;
+    },
+    createSmsGateway: async (data: any) => {
+        const response = await api.post("/sms-gateways", data);
+        return response.data;
+    },
+    updateSmsGateway: async (id: string, data: any) => {
+        const response = await api.put(`/sms-gateways/${id}`, data);
+        return response.data;
+    },
+    deleteSmsGateway: async (id: string) => {
+        await api.delete(`/sms-gateways/${id}`);
+    },
+    setSmsGatewayDefault: async (id: string) => {
+        await api.post(`/sms-gateways/${id}/default`);
+    },
+    testSmsGateway: async (id: string) => {
+        const response = await api.post(`/sms-gateways/${id}/test`);
+        return response.data;
     },
 
     // Change password
