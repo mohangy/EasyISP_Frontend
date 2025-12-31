@@ -9,6 +9,7 @@ export interface User {
     // Custom permission overrides
     addedPermissions?: string[];
     removedPermissions?: string[];
+    profilePicture?: string;
 }
 
 export interface AuthResponse {

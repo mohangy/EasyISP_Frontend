@@ -125,7 +125,7 @@ export interface Package {
     dataLimit?: number;
     validityDays?: number;
     serviceType: "PPPOE" | "HOTSPOT";
-    status: "ACTIVE" | "DISABLED";
+    isActive: boolean;
 }
 
 
@@ -303,8 +303,8 @@ export const customerApi = {
     // Get available packages for selection
     getPackages: async (connectionType?: "PPPOE" | "HOTSPOT"): Promise<Package[]> => {
         const params = connectionType ? `?connectionType=${connectionType}` : "";
-        const response = await api.get<{ packages: Package[] }>(`/packages${params}`);
-        return response.data.packages;
+        const response = await api.get<Package[]>(`/packages${params}`);
+        return response.data;
     },
 
     // Get active hotspot users from MikroTik via backend

@@ -660,7 +660,7 @@ export function ChangePlanModal({
                             className="w-full px-3 py-2.5 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                         >
                             <option value="">-- Select a plan --</option>
-                            {packages.map((pkg) => (
+                            {packages.filter(pkg => pkg.isActive !== false).map((pkg) => (
                                 <option
                                     key={pkg.id}
                                     value={pkg.id}
@@ -852,7 +852,7 @@ export function AddHotspotUserModal({
                         className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-slate-200 focus:outline-none focus:border-cyan-500"
                     >
                         <option value="">{loading ? "Loading packages..." : "Select a package"}</option>
-                        {Array.isArray(packages) && packages.map(pkg => (
+                        {Array.isArray(packages) && packages.filter(pkg => pkg.isActive !== false).map(pkg => (
                             <option key={pkg.id} value={pkg.id}>
                                 {pkg.name} @ KES {pkg.price}
                             </option>

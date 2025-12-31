@@ -14,6 +14,8 @@ export interface Package {
 
     // Router Assignment
     routerIds: string[]; // List of router IDs this package applies to
+    customerCount?: number;
+    voucherCount?: number;
 
     isActive: boolean;
     createdAt: string;

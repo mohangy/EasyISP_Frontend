@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit2, Trash2, Clock, MapPin, Gauge, AlertTriangle, Users, UserCheck, UserX, Coins } from "lucide-react";
+import { ArrowLeft, Edit2, Trash2, Clock, MapPin, Gauge, AlertTriangle, Users, UserCheck, UserX, Coins, Power } from "lucide-react";
 import { packageService } from "../../services/packageService";
 import type { Package } from "../../types/package";
 import { toast } from "react-hot-toast";
@@ -81,9 +81,10 @@ export function PackageDetails() {
             setPkg(updatedData);
             setIsEditOpen(false);
             toast.success("Package updated successfully");
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Failed to update package");
+            const message = error.response?.data?.error || error.response?.data?.message || "Failed to update package";
+            toast.error(message);
         }
     };
 
@@ -93,9 +94,30 @@ export function PackageDetails() {
             await packageService.deletePackage(pkg.id);
             toast.success("Package deleted");
             navigate("/packages");
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Failed to delete package");
+            const message = error.response?.data?.error || error.response?.data?.message || "Failed to delete package";
+            toast.error(message);
+        }
+    };
+
+    const handleToggleStatus = async () => {
+        if (!pkg) return;
+
+        if (pkg.isActive && (pkg.customerCount || 0) > 0) {
+            toast.error(`Cannot disable package. ${pkg.customerCount} users are currently assigned to it.`);
+            return;
+        }
+
+        try {
+            const updatedData = { ...pkg, isActive: !pkg.isActive };
+            await packageService.updatePackage(pkg.id, updatedData);
+            setPkg(updatedData);
+            toast.success(`Package ${updatedData.isActive ? 'enabled' : 'disabled'} successfully`);
+        } catch (error: any) {
+            console.error(error);
+            const message = error.response?.data?.error || error.response?.data?.message || "Failed to update package status";
+            toast.error(message);
         }
     };
 
@@ -145,6 +167,20 @@ export function PackageDetails() {
                 <div className="flex gap-2 w-full md:w-auto justify-center">
                     <PermissionGate permission={PERMISSIONS.PACKAGES_EDIT}>
                         <button
+                            onClick={handleToggleStatus}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border ${pkg.isActive && (pkg.customerCount || 0) > 0
+                                    ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
+                                    : pkg.isActive
+                                        ? 'bg-amber-500/10 text-amber-500 border-amber-500/50 hover:bg-amber-500/20'
+                                        : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/50 hover:bg-emerald-500/20'
+                                }`}
+                        >
+                            <Power className="w-4 h-4" />
+                            {pkg.isActive ? 'Disable' : 'Enable'}
+                        </button>
+                    </PermissionGate>
+                    <PermissionGate permission={PERMISSIONS.PACKAGES_EDIT}>
+                        <button
                             onClick={() => setIsEditOpen(true)}
                             className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-200 rounded-lg hover:bg-slate-700 transition-colors border border-slate-700"
                         >
@@ -154,8 +190,17 @@ export function PackageDetails() {
                     </PermissionGate>
                     <PermissionGate permission={PERMISSIONS.PACKAGES_DELETE}>
                         <button
-                            onClick={() => setIsDeleteOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 text-rose-500 rounded-lg hover:bg-rose-500/20 transition-colors border border-rose-500/50"
+                            onClick={() => {
+                                if ((pkg.customerCount || 0) > 0) {
+                                    toast.error(`Cannot delete package. ${pkg.customerCount} users are currently assigned to it.`);
+                                    return;
+                                }
+                                setIsDeleteOpen(true);
+                            }}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border ${(pkg.customerCount || 0) > 0
+                                ? "bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed"
+                                : "bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 border-rose-500/50"
+                                }`}
                         >
                             <Trash2 className="w-4 h-4" />
                             Delete

@@ -13,6 +13,7 @@ import { LocationPickerModal } from "../../components/ui/LocationPickerModal";
 interface Package {
     id: string;
     name: string;
+    isActive?: boolean;
 }
 
 export function PPPoECustomers() {
@@ -528,7 +529,7 @@ export function PPPoECustomers() {
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-200 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         >
                                             <option value="">Select a package</option>
-                                            {packages.map(pkg => (
+                                            {packages.filter(pkg => pkg.isActive !== false).map(pkg => (
                                                 <option key={pkg.id} value={pkg.id}>{pkg.name}</option>
                                             ))}
                                         </select>

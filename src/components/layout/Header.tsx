@@ -9,13 +9,16 @@ interface HeaderProps {
     onMenuClick: () => void;
 }
 
+import api from "../../services/api";
+
 export function Header({ onMenuClick }: HeaderProps) {
-    const { user, logout } = useAuthStore();
+    const { user, login } = useAuthStore();
     const { theme, setTheme } = useTheme();
     const navigate = useNavigate();
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Fetch tenant info
     useEffect(() => {
@@ -42,12 +45,46 @@ export function Header({ onMenuClick }: HeaderProps) {
     }, []);
 
     const handleLogout = () => {
-        logout();
+        useAuthStore.getState().logout(); // Ensure accessing state correctly
         navigate("/login");
     };
 
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user) return;
+
+        const formData = new FormData();
+        formData.append("profilePicture", file);
+
+        try {
+            const { data } = await api.post("/auth/profile-picture", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+
+            // Update user in store with new profile picture
+            // We need to keep existing token
+            const currentToken = useAuthStore.getState().token;
+            if (currentToken && data.user) {
+                login(data.user, currentToken);
+            }
+        } catch (error) {
+            console.error("Failed to upload profile picture:", error);
+        }
+    };
+
+    const defaultAvatar = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+    const avatarSrc = user?.profilePicture || defaultAvatar;
+
     return (
         <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-4 md:px-6 bg-white/95 dark:bg-slate-900/95 md:bg-white/80 md:dark:bg-slate-900/80 md:backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileUpload}
+            />
+
             {/* Left Section */}
             <div className="flex items-center gap-3">
                 {/* Hamburger Menu - Mobile only */}
@@ -93,9 +130,11 @@ export function Header({ onMenuClick }: HeaderProps) {
                         onClick={() => setShowDropdown(!showDropdown)}
                         className="flex items-center gap-2 p-1 pr-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     >
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-cyan-500/20">
-                            {user?.name?.charAt(0).toUpperCase() || "U"}
-                        </div>
+                        <img
+                            src={avatarSrc}
+                            alt="Profile"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm"
+                        />
                         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform hidden sm:block ${showDropdown ? "rotate-180" : ""}`} />
                     </button>
 
@@ -105,9 +144,20 @@ export function Header({ onMenuClick }: HeaderProps) {
                             {/* User Info */}
                             <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                                        {user?.name?.charAt(0).toUpperCase() || "U"}
-                                    </div>
+                                    <button
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="relative group w-12 h-12 rounded-xl overflow-hidden transition-transform active:scale-95"
+                                        title="Click to upload picture"
+                                    >
+                                        <img
+                                            src={avatarSrc}
+                                            alt="Profile"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <User className="w-5 h-5 text-white" />
+                                        </div>
+                                    </button>
                                     <div className="min-w-0">
                                         <p className="font-medium text-slate-900 dark:text-white truncate">{user?.name}</p>
                                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user?.email}</p>
