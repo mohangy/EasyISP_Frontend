@@ -127,7 +127,7 @@ export function PPPoEUserDetails() {
     };
 
     // Modal callback handlers
-    const handleEditUser = async (data: { username: string; name: string; password: string; email: string; phone: string; location: string }) => {
+    const handleEditUser = async (data: { username: string; name: string; password: string; email: string; phone: string; location: string; latitude?: number; longitude?: number }) => {
         if (!id) return;
         try {
             await customerApi.updateCustomer(id, data);
@@ -329,6 +329,9 @@ export function PPPoEUserDetails() {
         );
     }
 
+    // Check if user's plan is expired
+    const isExpired = user.expiresAt ? new Date(user.expiresAt) < new Date() : false;
+
     return (
         <div className="space-y-6">
             {/* Header / Breadcrumb */}
@@ -354,17 +357,17 @@ export function PPPoEUserDetails() {
                             <span className="w-1 h-4 bg-blue-500 rounded-full" />
                             Personal Details
                         </h3>
-                        <StatusBadge status={user.status} />
+                        <StatusBadge status={isExpired ? 'EXPIRED' : user.status} />
                     </div>
 
                     <div className="space-y-3">
-                        <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/50">
-                            <span className="text-base text-slate-500 dark:text-slate-400">Name</span>
-                            <span className="text-base font-medium text-slate-900 dark:text-slate-200">{user.name || "-"}</span>
+                        <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/50 gap-4">
+                            <span className="text-base text-slate-500 dark:text-slate-400 flex-shrink-0">Name</span>
+                            <span className="text-base font-medium text-slate-900 dark:text-slate-200 truncate max-w-[180px]" title={user.name}>{user.name || "-"}</span>
                         </div>
-                        <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/50">
-                            <span className="text-base text-slate-500 dark:text-slate-400">Username</span>
-                            <span className="text-base font-medium text-slate-900 dark:text-slate-200">{user.username || "-"}</span>
+                        <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/50 gap-4">
+                            <span className="text-base text-slate-500 dark:text-slate-400 flex-shrink-0">Username</span>
+                            <span className="text-base font-medium text-slate-900 dark:text-slate-200 truncate max-w-[180px]" title={user.username}>{user.username || "-"}</span>
                         </div>
                         <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/50">
                             <span className="text-base text-slate-500 dark:text-slate-400">Password</span>
@@ -381,9 +384,9 @@ export function PPPoEUserDetails() {
                                 </button>
                             </div>
                         </div>
-                        <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/50">
-                            <span className="text-base text-slate-500 dark:text-slate-400">Location</span>
-                            <span className="text-base font-medium text-slate-900 dark:text-slate-200">{user.location || "-"}</span>
+                        <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/50 gap-4">
+                            <span className="text-base text-slate-500 dark:text-slate-400 flex-shrink-0">Location</span>
+                            <span className="text-base font-medium text-slate-900 dark:text-slate-200 truncate max-w-[180px]" title={user.location}>{user.location || "-"}</span>
                         </div>
                         <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/50">
                             <span className="text-base text-slate-500 dark:text-slate-400">Coordinates</span>
@@ -596,42 +599,42 @@ export function PPPoEUserDetails() {
                         </div>
 
                         {/* Current Plan Card */}
-                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-5 text-white shadow-lg relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-cyan-500/30 transition-all duration-700" />
+                        <div className={`rounded-xl p-5 text-white shadow-lg relative overflow-hidden group bg-gradient-to-br from-slate-900 to-slate-800 ${isExpired
+                            ? 'border-2 border-red-500'
+                            : ''
+                            }`}>
+                            <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl -mr-16 -mt-16 transition-all duration-700 ${isExpired
+                                ? 'bg-red-500/20 group-hover:bg-red-500/30'
+                                : 'bg-cyan-500/20 group-hover:bg-cyan-500/30'
+                                }`} />
 
                             <div className="relative z-10">
-                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wide mb-1">Current Plan</h3>
+                                <h3 className={`text-sm font-bold uppercase tracking-wide mb-1 ${isExpired ? 'text-red-400' : 'text-slate-400'}`}>
+                                    Current Plan {isExpired && <span className="text-red-500 ml-2">• EXPIRED</span>}
+                                </h3>
                                 <div className="flex justify-between items-start mb-4">
-                                    <h2 className="text-xl font-bold">{user.package?.name || "No Plan"}</h2>
-                                    <span className="bg-white/10 px-2 py-1 rounded text-base font-medium backdrop-blur-sm">
+                                    <h2 className={`text-xl font-bold ${isExpired ? 'text-red-400' : 'text-white'}`}>{user.package?.name || "No Plan"}</h2>
+                                    <span className={`px-2 py-1 rounded text-base font-medium backdrop-blur-sm ${isExpired ? 'bg-red-500/20 text-red-400' : 'bg-white/10'
+                                        }`}>
                                         {user.package?.price ? `KES ${user.package.price.toLocaleString()}` : 'Free'}
                                     </span>
                                 </div>
 
-                                <div className="space-y-3 mb-4">
-                                    <div>
-                                        <div className="flex justify-between text-sm text-slate-400 mb-1">
-                                            <span>Download</span>
-                                            <span>{user.monthlyUsage?.download || 0} GB</span>
-                                        </div>
-                                        <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                                            <div className="h-full bg-cyan-400 rounded-full" style={{ width: '45%' }} />
-                                        </div>
+                                <div className="space-y-2 mb-4">
+                                    <div className="flex justify-between text-sm">
+                                        <span className={isExpired ? 'text-red-400' : 'text-slate-400'}>Download</span>
+                                        <span className={`font-medium ${isExpired ? 'text-red-400' : 'text-white'}`}>{user.monthlyUsage?.download || 0} GB</span>
                                     </div>
-                                    <div>
-                                        <div className="flex justify-between text-sm text-slate-400 mb-1">
-                                            <span>Upload</span>
-                                            <span>{user.monthlyUsage?.upload || 0} GB</span>
-                                        </div>
-                                        <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                                            <div className="h-full bg-blue-400 rounded-full" style={{ width: '20%' }} />
-                                        </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className={isExpired ? 'text-red-400' : 'text-slate-400'}>Upload</span>
+                                        <span className={`font-medium ${isExpired ? 'text-red-400' : 'text-white'}`}>{user.monthlyUsage?.upload || 0} GB</span>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 text-sm text-slate-300 bg-white/5 p-2 rounded-lg backdrop-blur-sm">
-                                    <Clock className="w-3.5 h-3.5 text-orange-400" />
-                                    <span>Expires: <span className="text-white font-medium">{formatDate(user.expiresAt)}</span></span>
+                                <div className={`flex items-center gap-2 text-sm p-2 rounded-lg backdrop-blur-sm ${isExpired ? 'text-red-400 bg-red-500/10' : 'text-slate-300 bg-white/5'
+                                    }`}>
+                                    <Clock className={`w-3.5 h-3.5 ${isExpired ? 'text-red-500' : 'text-orange-400'}`} />
+                                    <span>Expires: <span className={`font-medium ${isExpired ? 'text-red-400' : 'text-white'}`}>{formatDate(user.expiresAt)}</span></span>
                                 </div>
 
                                 <div className="mt-4 flex flex-wrap justify-center gap-2">

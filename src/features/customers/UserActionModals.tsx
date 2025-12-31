@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Modal } from "../../components/ui/Modal";
-import { AlertTriangle, Send, Trash2, RefreshCw, WifiOff, Calendar, ArrowRightLeft } from "lucide-react";
+import { AlertTriangle, Send, Trash2, RefreshCw, WifiOff, Calendar, ArrowRightLeft, MapPin } from "lucide-react";
 import { voucherApi } from "../../services/voucherService";
+import { LocationPickerModal } from "../../components/ui/LocationPickerModal";
 
 // ============ EDIT USER MODAL ============
 interface EditUserModalProps {
@@ -14,6 +15,8 @@ interface EditUserModalProps {
         email?: string;
         phone?: string;
         location?: string;
+        latitude?: number;
+        longitude?: number;
     } | null;
     onSave: (data: {
         username: string;
@@ -22,6 +25,8 @@ interface EditUserModalProps {
         email: string;
         phone: string;
         location: string;
+        latitude?: number;
+        longitude?: number;
     }) => Promise<void>;
 }
 
@@ -32,9 +37,12 @@ export function EditUserModal({ isOpen, onClose, user, onSave }: EditUserModalPr
         password: "",
         email: "",
         phone: "",
-        location: ""
+        location: "",
+        latitude: "",
+        longitude: ""
     });
     const [loading, setLoading] = useState(false);
+    const [showMapPicker, setShowMapPicker] = useState(false);
 
     useEffect(() => {
         if (user && isOpen) {
@@ -44,16 +52,31 @@ export function EditUserModal({ isOpen, onClose, user, onSave }: EditUserModalPr
                 password: user.password || "",
                 email: user.email || "",
                 phone: user.phone || "",
-                location: user.location || ""
+                location: user.location || "",
+                latitude: user.latitude?.toString() || "",
+                longitude: user.longitude?.toString() || ""
             });
         }
     }, [user, isOpen]);
+
+    const handleLocationSelect = (lat: number, lng: number, address?: string) => {
+        setForm(prev => ({
+            ...prev,
+            latitude: lat.toFixed(6),
+            longitude: lng.toFixed(6),
+            location: address || prev.location
+        }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await onSave(form);
+            await onSave({
+                ...form,
+                latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+                longitude: form.longitude ? parseFloat(form.longitude) : undefined
+            });
             onClose();
         } finally {
             setLoading(false);
@@ -131,6 +154,46 @@ export function EditUserModal({ isOpen, onClose, user, onSave }: EditUserModalPr
                         className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white"
                     />
                 </div>
+
+                {/* Coordinates Section */}
+                <div>
+                    <div className="flex items-center justify-between mb-1">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Coordinates
+                        </label>
+                        <button
+                            type="button"
+                            onClick={() => setShowMapPicker(true)}
+                            className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                        >
+                            <MapPin className="w-3.5 h-3.5" />
+                            Pick on Map
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <input
+                                type="number"
+                                step="any"
+                                value={form.latitude}
+                                onChange={(e) => setForm({ ...form, latitude: e.target.value })}
+                                placeholder="Latitude (e.g., -4.044584)"
+                                className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm"
+                            />
+                        </div>
+                        <div>
+                            <input
+                                type="number"
+                                step="any"
+                                value={form.longitude}
+                                onChange={(e) => setForm({ ...form, longitude: e.target.value })}
+                                placeholder="Longitude (e.g., 39.661911)"
+                                className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white text-sm"
+                            />
+                        </div>
+                    </div>
+                </div>
+
                 <div className="flex justify-end gap-3 pt-4">
                     <button
                         type="button"
@@ -148,6 +211,15 @@ export function EditUserModal({ isOpen, onClose, user, onSave }: EditUserModalPr
                     </button>
                 </div>
             </form>
+
+            {/* Map Location Picker Modal */}
+            <LocationPickerModal
+                isOpen={showMapPicker}
+                onClose={() => setShowMapPicker(false)}
+                onSelect={handleLocationSelect}
+                initialLat={form.latitude ? parseFloat(form.latitude) : undefined}
+                initialLng={form.longitude ? parseFloat(form.longitude) : undefined}
+            />
         </Modal>
     );
 }

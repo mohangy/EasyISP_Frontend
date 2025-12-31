@@ -52,16 +52,51 @@ export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: H
     useEffect(() => {
         if (isOpen) {
             if (initialData) {
+                // Convert sessionTime from minutes to best display unit
+                let sessionTimeValue = "";
+                let sessionTimeUnit = "HOURS";
+                if (initialData.sessionTime) {
+                    const minutes = initialData.sessionTime;
+                    if (minutes >= 1440 && minutes % 1440 === 0) {
+                        sessionTimeValue = (minutes / 1440).toString();
+                        sessionTimeUnit = "DAYS";
+                    } else if (minutes >= 60 && minutes % 60 === 0) {
+                        sessionTimeValue = (minutes / 60).toString();
+                        sessionTimeUnit = "HOURS";
+                    } else {
+                        sessionTimeValue = minutes.toString();
+                        sessionTimeUnit = "MINUTES";
+                    }
+                }
+
+                // Convert dataLimit from bytes to best display unit
+                let dataLimitValue = "";
+                let dataLimitUnit = "MB";
+                if (initialData.dataLimit) {
+                    const bytes = typeof initialData.dataLimit === 'string'
+                        ? parseInt(initialData.dataLimit, 10)
+                        : initialData.dataLimit;
+                    const GB = 1024 * 1024 * 1024;
+                    const MB = 1024 * 1024;
+                    if (bytes >= GB && bytes % GB === 0) {
+                        dataLimitValue = (bytes / GB).toString();
+                        dataLimitUnit = "GB";
+                    } else {
+                        dataLimitValue = Math.round(bytes / MB).toString();
+                        dataLimitUnit = "MB";
+                    }
+                }
+
                 setFormData({
                     name: initialData.name || "",
                     price: initialData.price?.toString() || "",
                     downloadSpeed: initialData.downloadSpeed?.toString() || "",
                     uploadSpeed: initialData.uploadSpeed?.toString() || "",
-                    sessionTime: initialData.sessionTime?.toString() || "",
-                    sessionTimeUnit: initialData.sessionTimeUnit || "HOURS",
-                    dataLimit: initialData.dataLimit?.toString() || "",
-                    dataLimitUnit: initialData.dataLimitUnit || "MB",
-                    routerIds: initialData.routerIds || []
+                    sessionTime: sessionTimeValue,
+                    sessionTimeUnit: sessionTimeUnit,
+                    dataLimit: dataLimitValue,
+                    dataLimitUnit: dataLimitUnit,
+                    routerIds: initialData.routerIds || (initialData.routers ? initialData.routers.map((r: any) => r.id) : [])
                 });
                 setShowDataLimit(!!initialData.dataLimit);
             } else {
@@ -75,14 +110,51 @@ export function HotspotPackageForm({ isOpen, onClose, onSubmit, initialData }: H
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Convert sessionTime to minutes based on unit
+        let sessionTimeInMinutes: number | undefined;
+        if (formData.sessionTime) {
+            const value = parseInt(formData.sessionTime);
+            switch (formData.sessionTimeUnit) {
+                case 'MINUTES':
+                    sessionTimeInMinutes = value;
+                    break;
+                case 'HOURS':
+                    sessionTimeInMinutes = value * 60;
+                    break;
+                case 'DAYS':
+                    sessionTimeInMinutes = value * 60 * 24;
+                    break;
+                default:
+                    sessionTimeInMinutes = value;
+            }
+        }
+
+        // Convert dataLimit to bytes based on unit
+        let dataLimitInBytes: number | undefined;
+        if (formData.dataLimit) {
+            const value = parseInt(formData.dataLimit);
+            switch (formData.dataLimitUnit) {
+                case 'MB':
+                    dataLimitInBytes = value * 1024 * 1024;
+                    break;
+                case 'GB':
+                    dataLimitInBytes = value * 1024 * 1024 * 1024;
+                    break;
+                default:
+                    dataLimitInBytes = value;
+            }
+        }
+
         onSubmit({
-            ...formData,
+            name: formData.name,
             type: "HOTSPOT",
             price: parseFloat(formData.price),
             downloadSpeed: parseInt(formData.downloadSpeed),
             uploadSpeed: parseInt(formData.uploadSpeed),
-            sessionTime: formData.sessionTime ? parseInt(formData.sessionTime) : undefined,
-            dataLimit: formData.dataLimit ? parseInt(formData.dataLimit) : undefined
+            sessionTime: sessionTimeInMinutes,
+            dataLimit: dataLimitInBytes,
+            routerIds: formData.routerIds
         });
     };
 

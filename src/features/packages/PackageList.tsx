@@ -7,6 +7,42 @@ interface PackageListProps {
     loading: boolean;
 }
 
+// Helper function to format session time (stored in minutes)
+function formatSessionTime(minutes?: number): string {
+    if (!minutes) return '-';
+
+    if (minutes < 60) {
+        return `${minutes} min`;
+    } else if (minutes < 1440) {
+        const hours = Math.floor(minutes / 60);
+        return `${hours} hour${hours > 1 ? 's' : ''}`;
+    } else {
+        const days = Math.floor(minutes / 1440);
+        return `${days} day${days > 1 ? 's' : ''}`;
+    }
+}
+
+// Helper function to format data limit (stored in bytes as string)
+function formatDataLimit(bytes?: string | number | null): string {
+    if (!bytes) return '-';
+
+    const numBytes = typeof bytes === 'string' ? parseInt(bytes, 10) : bytes;
+    if (isNaN(numBytes) || numBytes <= 0) return '-';
+
+    const KB = 1024;
+    const MB = KB * 1024;
+    const GB = MB * 1024;
+
+    if (numBytes >= GB) {
+        return `${(numBytes / GB).toFixed(numBytes % GB === 0 ? 0 : 1)} GB`;
+    } else if (numBytes >= MB) {
+        return `${(numBytes / MB).toFixed(numBytes % MB === 0 ? 0 : 1)} MB`;
+    } else if (numBytes >= KB) {
+        return `${(numBytes / KB).toFixed(0)} KB`;
+    }
+    return `${numBytes} B`;
+}
+
 export function PackageList({ packages, loading }: PackageListProps) {
     const navigate = useNavigate();
 
@@ -53,15 +89,19 @@ export function PackageList({ packages, loading }: PackageListProps) {
                                     {pkg.uploadSpeed}M/{pkg.downloadSpeed}M
                                 </td>
                                 <td className="px-4 py-3 text-slate-300">
-                                    {pkg.sessionTime ? `${pkg.sessionTime} ${pkg.sessionTimeUnit}` : '-'}
+                                    {formatSessionTime(pkg.sessionTime)}
                                 </td>
                                 <td className="px-4 py-3 text-slate-300">
-                                    {pkg.dataLimit ? `${pkg.dataLimit}${pkg.dataLimitUnit}` : '-'}
+                                    {formatDataLimit(pkg.dataLimit)}
                                 </td>
                                 <td className="px-4 py-3 text-slate-500 text-xs">
-                                    {(pkg.routerIds?.length || 0) > 0 ? (pkg.routerIds.length > 1 ? 'Multiple' : 'ac') : 'no'}
+                                    {(pkg.routers?.length || 0) > 0 ? (pkg.routers!.length > 1 ? 'Multiple' : pkg.routers![0].name) : 'no'}
                                 </td>
-                                <td className="px-4 py-3 text-slate-400 text-xs">active</td>
+                                <td className="px-4 py-3">
+                                    <span className={`text-xs ${pkg.isActive ? 'text-green-400' : 'text-red-400'}`}>
+                                        {pkg.isActive ? 'active' : 'inactive'}
+                                    </span>
+                                </td>
                             </tr>
                         ))}
                         {packages.length === 0 && (

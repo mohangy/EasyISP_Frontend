@@ -7,13 +7,14 @@ export interface Package {
     uploadSpeed: number;   // Mbps
 
     // Hotspot Specific
-    sessionTime?: number;
-    sessionTimeUnit?: 'HOURS' | 'DAYS' | 'MINUTES';
-    dataLimit?: number;
-    dataLimitUnit?: 'MB' | 'GB';
+    sessionTime?: number;        // Minutes (backend stores raw minutes)
+    sessionTimeUnit?: string;    // Optional - for form input only
+    dataLimit?: string | number | null; // Bytes as string (BigInt serialized) or number
+    dataLimitUnit?: string;      // Optional - for form input only
 
-    // Router Assignment
-    routerIds: string[]; // List of router IDs this package applies to
+    // Router Assignment - backend returns array of router objects
+    routers?: Array<{ id: string; name: string }>;
+    routerIds?: string[]; // For form submission only
     customerCount?: number;
     voucherCount?: number;
 

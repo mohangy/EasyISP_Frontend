@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Plus, Download, RotateCcw, Loader2, Search } from "lucide-react";
+import { Plus, Download, RotateCcw, Loader2, Search, ExternalLink } from "lucide-react";
 import { customerApi, type Customer } from "../../services/customerService";
 import toast from "react-hot-toast";
 import { PERMISSIONS } from "../../lib/permissions";
 import { ProtectedButton } from "../../components/auth/ProtectedButton";
 import { AddHotspotUserModal, ConfirmModal, ModalIcons } from "./UserActionModals";
+import { useAuthStore } from "../../store/authStore";
 
 export function HotspotCustomers() {
     const location = useLocation();
+    const { user } = useAuthStore();
 
     // Data state
     const [customers, setCustomers] = useState<Customer[]>([]);
@@ -17,7 +19,19 @@ export function HotspotCustomers() {
     const [showAddUserModal, setShowAddUserModal] = useState(false);
     const [showDeleteExpiredModal, setShowDeleteExpiredModal] = useState(false);
     const [showDeleteUnusedModal, setShowDeleteUnusedModal] = useState(false);
-    // const { can } = usePermissions();
+
+    // Open captive portal preview in new tab
+    const openPortalPreview = () => {
+        if (!user?.tenantId) {
+            toast.error("Tenant ID not found");
+            return;
+        }
+        const apiUrl = import.meta.env.VITE_API_URL || window.location.origin + '/api';
+        // Build the portal preview URL - change the base to match your backend
+        const backendUrl = apiUrl.replace('/api', '');
+        const portalUrl = `${backendUrl}/portal-preview/login.html?tenantId=${user.tenantId}`;
+        window.open(portalUrl, '_blank');
+    };
 
     // Filter state
     const [searchQuery, setSearchQuery] = useState("");
@@ -152,7 +166,14 @@ export function HotspotCustomers() {
                         Overview of all Hotspot Users
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                        onClick={openPortalPreview}
+                        className="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg font-medium hover:bg-cyan-700 transition-all text-sm"
+                    >
+                        <ExternalLink className="w-4 h-4" />
+                        Preview Portal
+                    </button>
                     <ProtectedButton
                         permission={PERMISSIONS.CUSTOMERS_CREATE}
                         onClick={() => setShowAddUserModal(true)}
