@@ -42,13 +42,24 @@ const CATEGORIES = {
 
 type ExpenseCategory = keyof typeof CATEGORIES;
 
+interface Expense {
+    id: string;
+    description: string;
+    vendor: string;
+    category: ExpenseCategory;
+    paymentMethod: string;
+    date: string;
+    amount: number;
+    isRecurring?: boolean;
+}
+
 export function Expenses() {
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState<string>("all");
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [expenses, setExpenses] = useState<any[]>([]);  // Will fetch from API
+    const [expenses, _setExpenses] = useState<Expense[]>([]);  // Will fetch from API
 
     // Filter logic
     const filteredData = useMemo(() => {

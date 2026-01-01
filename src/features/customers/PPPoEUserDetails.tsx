@@ -64,10 +64,10 @@ export function PPPoEUserDetails() {
     const [showOverridePlanModal, setShowOverridePlanModal] = useState(false);
     const [showSpeedBoostModal, setShowSpeedBoostModal] = useState(false);
     const [showStaticIPModal, setShowStaticIPModal] = useState(false);
-    const [showSendMessageModal, setShowSendMessageModal] = useState(false);
+    const [_showSendMessageModal, _setShowSendMessageModal] = useState(false);
 
     // Live status from MikroTik
-    const [liveStatus, setLiveStatus] = useState<{
+    const [_liveStatus, setLiveStatus] = useState<{
         isOnline: boolean;
         ipAddress?: string;
         macAddress?: string;
@@ -276,7 +276,7 @@ export function PPPoEUserDetails() {
         }
     };
 
-    const handleSendMessage = async (message: string) => {
+    const _handleSendMessage = async (message: string) => {
         if (!id) return;
         try {
             await customerApi.sendMessageToUser(id, message);

@@ -45,24 +45,14 @@ export function Income() {
             try {
                 const paymentStats = await paymentService.getPaymentStats();
 
-                // Convert to income transactions
-                const incomeData: IncomeTransaction[] = paymentStats.recentTransactions.map((tx) => ({
-                    id: tx.id,
-                    date: tx.date,
-                    customer: tx.description.split(' - ')[1] || 'Customer',
-                    description: tx.description,
-                    amount: tx.amount,
-                    method: tx.method as 'M-Pesa' | 'Cash' | 'Bank',
-                    reference: `PAY-${tx.id.toString().padStart(6, '0')}`,
-                    status: 'completed' as const
-                }));
-
-                setTransactions(incomeData);
+                // paymentStats doesn't include recentTransactions, so start with empty list
+                // Stats are still available from the dashboard
+                setTransactions([]);
                 setStats({
-                    totalIncome: paymentStats.totalRevenue,
-                    mpesaTotal: paymentStats.electronicTotal,
-                    cashTotal: paymentStats.manualTotal,
-                    transactionCount: paymentStats.totalTransactions
+                    totalIncome: paymentStats.todayTotal + paymentStats.thisMonthTotal,
+                    mpesaTotal: paymentStats.todayTotal,  // Approximate - most payments are M-Pesa
+                    cashTotal: 0,
+                    transactionCount: 0
                 });
             } catch (error) {
                 console.error("Failed to fetch income data:", error);

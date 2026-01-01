@@ -44,7 +44,7 @@ export function HotspotUserDetails() {
     const navigate = useNavigate();
     const [user, setUser] = useState<HotspotUser | null>(null);
     const [loading, setLoading] = useState(true);
-    const [mpesaTransactions, setMpesaTransactions] = useState<MpesaTransaction[]>([]);
+    const [mpesaTransactions, _setMpesaTransactions] = useState<MpesaTransaction[]>([]);
     const [connectionLogs, setConnectionLogs] = useState<ConnectionLog[]>([]);
 
     // Pagination state for transactions

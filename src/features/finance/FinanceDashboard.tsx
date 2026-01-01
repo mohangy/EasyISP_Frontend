@@ -5,13 +5,10 @@ import {
     DollarSign,
     Users,
     ArrowUpRight,
-    ArrowDownRight,
     RefreshCw,
     Calendar,
     Download,
-    CreditCard,
     Smartphone,
-    Banknote,
     PiggyBank,
     AlertCircle,
     CheckCircle2,
@@ -43,20 +40,17 @@ const EXPENSE_DATA = {
     ],
 };
 
-// Type for payment stats
+// Type for payment stats - matches what paymentService.getPaymentStats() returns
 interface PaymentStats {
-    totalRevenue: number;
-    electronicTotal: number;
-    manualTotal: number;
     todayTotal: number;
-    todayElectronic: number;
-    todayTransactions: number;
-    todayElectronicTransactions: number;
     thisMonthTotal: number;
-    growthPercent: string;
-    totalTransactions: number;
-    revenueByType: { name: string; amount: number; percentage: number }[];
-    recentTransactions: { id: number; type: string; description: string; amount: number; date: string; method: string }[];
+    totalByPeriod: {
+        today: number;
+        thisWeek: number;
+        thisMonth: number;
+        thisYear: number;
+    };
+    revenueTrend: unknown[];
 }
 
 export function FinanceDashboard() {
@@ -88,17 +82,17 @@ export function FinanceDashboard() {
     };
 
     // Calculate derived values
-    const totalRevenue = paymentStats?.totalRevenue || 0;
+    const totalRevenue = paymentStats?.thisMonthTotal || 0;
     const totalExpenses = EXPENSE_DATA.totalExpenses;
     const netProfit = totalRevenue - totalExpenses;
     const profitMargin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : '0.0';
     const mrr = paymentStats?.thisMonthTotal || 0;
-    const activeSubscriptions = paymentStats?.totalTransactions || 0;
-    const arpu = activeSubscriptions > 0 ? Math.round(totalRevenue / activeSubscriptions) : 0;
+    const activeSubscriptions = 0;  // Not available from current API
+    const arpu = 0;  // Not available from current API
 
     // M-Pesa specific
-    const mpesaToday = paymentStats?.todayElectronic || 0;
-    const mpesaTransactions = paymentStats?.todayElectronicTransactions || 0;
+    const mpesaToday = paymentStats?.todayTotal || 0;
+    const mpesaTransactions = 0;  // Not available from current API
 
     if (isLoading) {
         return (
@@ -330,22 +324,8 @@ export function FinanceDashboard() {
                 <div className="bg-white dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700/50">
                     <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Revenue Breakdown</h3>
                     <div className="space-y-4">
-                        {(paymentStats?.revenueByType || []).map((item: { name: string; amount: number; percentage: number }, index: number) => (
-                            <div key={index}>
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="text-slate-600 dark:text-slate-300">{item.name}</span>
-                                    <span className="font-medium text-slate-900 dark:text-white">
-                                        {formatCurrency(item.amount)} ({item.percentage}%)
-                                    </span>
-                                </div>
-                                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                                    <div
-                                        className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                                        style={{ width: `${item.percentage}%` }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+                        {/* No revenue breakdown data available from current API */}
+                        <p className="text-slate-500 dark:text-slate-400 text-center py-4">No revenue data available</p>
                     </div>
                 </div>
 
@@ -395,33 +375,12 @@ export function FinanceDashboard() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                            {(paymentStats?.recentTransactions || []).map((tx: { id: number; type: string; description: string; amount: number; date: string; method: string }) => (
-                                <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${tx.type === 'income'
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                            }`}>
-                                            {tx.type === 'income' ? <ArrowDownRight className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
-                                            {tx.type === 'income' ? 'Income' : 'Expense'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-900 dark:text-white">{tx.description}</td>
-                                    <td className="px-6 py-4">
-                                        <span className="inline-flex items-center gap-1 text-sm text-slate-600 dark:text-slate-300">
-                                            {tx.method === 'M-Pesa' && <Smartphone className="w-3 h-3 text-green-500" />}
-                                            {tx.method === 'Bank' && <CreditCard className="w-3 h-3 text-blue-500" />}
-                                            {tx.method === 'Cash' && <Banknote className="w-3 h-3 text-amber-500" />}
-                                            {tx.method}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{tx.date}</td>
-                                    <td className={`px-6 py-4 text-sm font-medium text-right ${tx.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                                        }`}>
-                                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                                    </td>
-                                </tr>
-                            ))}
+                            {/* No recent transactions data available from current API */}
+                            <tr>
+                                <td colSpan={5} className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                                    No recent transactions available
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

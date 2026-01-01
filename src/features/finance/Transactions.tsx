@@ -25,26 +25,10 @@ export function Transactions() {
         const fetchTransactions = async () => {
             try {
                 // Get income from payment service
-                const paymentStats = await paymentService.getPaymentStats();
+                await paymentService.getPaymentStats();
 
-                // Convert payment service transactions to our ledger format
-                const incomeTransactions: Transaction[] = paymentStats.recentTransactions.map(pt => ({
-                    id: pt.id,
-                    date: new Date(pt.date).toISOString(), // rough conversion for sorting
-                    description: pt.description,
-                    reference: `PAY-${pt.id}`,
-                    amount: pt.amount,
-                    type: 'credit', // Income is Credit in revenue accounts (simplified view)
-                    category: 'Sales',
-                    status: 'posted'
-                }));
-
-                // Sort by date
-                const allTransactions = incomeTransactions.sort((a, b) =>
-                    new Date(b.date).getTime() - new Date(a.date).getTime()
-                );
-
-                setTransactions(allTransactions);
+                // paymentStats doesn't include recentTransactions, so start with empty list
+                setTransactions([]);
             } catch (error) {
                 console.error("Failed to fetch transactions:", error);
                 toast.error("Failed to load transactions");

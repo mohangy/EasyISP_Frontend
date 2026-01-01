@@ -18,7 +18,7 @@ export function ChartOfAccounts() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filterType, setFilterType] = useState<string>("All");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [accounts, setAccounts] = useState<Account[]>([]);  // Will fetch from API
+    const [accounts, _setAccounts] = useState<Account[]>([]);  // Will fetch from API
 
     // Filter logic
     const filteredAccounts = accounts.filter(acc => {

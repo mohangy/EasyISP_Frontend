@@ -34,13 +34,25 @@ const STATUS_CONFIG = {
     cancelled: { label: "Cancelled", color: "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500", icon: XCircle },
 };
 
+type InvoiceStatus = keyof typeof STATUS_CONFIG;
+
+interface Invoice {
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    amount: number;
+    status: InvoiceStatus;
+    dueDate: string;
+    createdAt: string;
+}
+
 export function Invoices() {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [invoices, setInvoices] = useState<any[]>([]);  // Will fetch from API
+    const [invoices, _setInvoices] = useState<Invoice[]>([]);  // Will fetch from API
 
     // Filter logic
     const filteredData = useMemo(() => {
