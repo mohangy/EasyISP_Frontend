@@ -399,50 +399,66 @@ function PaymentGatewayForm({ gateway, onCancel, onSave }: { gateway: PaymentGat
                     </div>
 
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-1.5">Consumer Key</label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.consumerKey}
-                                onChange={e => setFormData({ ...formData, consumerKey: e.target.value })}
-                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
-                                placeholder="Daraja Consumer Key"
-                            />
-                        </div>
+                        {/* Only show API credentials for PAYBILL and BUYGOODS (M-Pesa API types) */}
+                        {(formData.subType === 'PAYBILL' || formData.subType === 'BUYGOODS') && (
+                            <>
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <label className="block text-sm font-medium text-slate-400 mb-1.5">Consumer Key</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.consumerKey}
+                                        onChange={e => setFormData({ ...formData, consumerKey: e.target.value })}
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
+                                        placeholder="Daraja Consumer Key"
+                                    />
+                                </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-1.5">Consumer Secret</label>
-                            <div className="relative">
-                                <input
-                                    type={showSecret ? "text" : "password"}
-                                    required
-                                    value={formData.consumerSecret}
-                                    onChange={e => setFormData({ ...formData, consumerSecret: e.target.value })}
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm pr-10"
-                                    placeholder="Daraja Consumer Secret"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowSecret(!showSecret)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-                                >
-                                    {showSecret ? "Hide" : "Show"}
-                                </button>
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <label className="block text-sm font-medium text-slate-400 mb-1.5">Consumer Secret</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showSecret ? "text" : "password"}
+                                            required
+                                            value={formData.consumerSecret}
+                                            onChange={e => setFormData({ ...formData, consumerSecret: e.target.value })}
+                                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm pr-10"
+                                            placeholder="Daraja Consumer Secret"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowSecret(!showSecret)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                                        >
+                                            {showSecret ? "Hide" : "Show"}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <label className="block text-sm font-medium text-slate-400 mb-1.5">Passkey</label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={formData.passkey}
+                                        onChange={e => setFormData({ ...formData, passkey: e.target.value })}
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
+                                        placeholder="SimToolKit Passkey"
+                                    />
+                                    <p className="text-xs text-slate-500 mt-1">Required for STK Push.</p>
+                                </div>
+                            </>
+                        )}
+
+                        {/* BANK type shows info about manual configuration */}
+                        {formData.subType === 'BANK' && (
+                            <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                                <p className="text-sm text-blue-300">
+                                    <strong>Bank Transfer Integration:</strong> This gateway type is for manual bank transfer payments.
+                                    Customers will see bank account details and can pay via mobile banking or direct transfer.
+                                </p>
                             </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-400 mb-1.5">Passkey</label>
-                            <input
-                                type="password"
-                                value={formData.passkey}
-                                onChange={e => setFormData({ ...formData, passkey: e.target.value })}
-                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
-                                placeholder="SimToolKit Passkey"
-                            />
-                            <p className="text-xs text-slate-500 mt-1">Required for STK Push.</p>
-                        </div>
+                        )}
                     </div>
                 </div>
 
