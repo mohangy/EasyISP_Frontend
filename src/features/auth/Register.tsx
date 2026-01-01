@@ -3,7 +3,7 @@ import { useAuthStore } from "../../store/authStore";
 import { useNavigate, Link } from "react-router-dom";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
-import { Wifi, Eye, EyeOff, Building2, Mail, Lock, User, Phone, CheckCircle2 } from "lucide-react";
+import { Wifi, Eye, EyeOff, Building2, Mail, Lock, CheckCircle2 } from "lucide-react";
 import { authApi } from "../../services/authService";
 
 export function Register() {

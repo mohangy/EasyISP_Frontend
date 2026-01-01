@@ -48,12 +48,19 @@ export const PERMISSIONS = {
     // ==================== PAYMENTS ====================
     PAYMENTS_VIEW_ELECTRONIC: 'payments:view_electronic',
     PAYMENTS_VIEW_MANUAL: 'payments:view_manual',
+    PAYMENTS_PROCESS: 'payments:process',
+
+    // ==================== CUSTOMERS (General) ====================
+    CUSTOMERS_CREATE: 'customers:create',
+    CUSTOMERS_EDIT: 'customers:edit',
+    CUSTOMERS_DELETE: 'customers:delete',
 
     // ==================== SMS ====================
     SMS_VIEW: 'sms:view',
     SMS_SETTINGS: 'sms:settings',
     SMS_COMPOSE: 'sms:compose',
     SMS_CLEAR: 'sms:clear',
+    SMS_SEND: 'sms:send',
     // SMS Details
     SMS_DELETE: 'sms:delete',
     SMS_RESEND: 'sms:resend',

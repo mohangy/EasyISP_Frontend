@@ -7,16 +7,10 @@ interface SmsSettingsModalProps {
     onSave?: () => void;
 }
 
-export function SmsSettingsModal({ isOpen, onClose, onSave }: SmsSettingsModalProps) {
+export function SmsSettingsModal({ isOpen, onClose }: SmsSettingsModalProps) {
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="SMS Provider Settings">
-            <SmsSettingsForm
-                onSave={() => {
-                    onSave?.();
-                    onClose();
-                }}
-                onCancel={onClose}
-            />
+            <SmsSettingsForm />
         </Modal>
     );
 }

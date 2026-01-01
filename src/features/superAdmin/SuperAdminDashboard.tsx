@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { superAdminApi, type TenantInfo, type SaaSStats } from "../../services/superAdminService";
-import { Building2, Users, Router, UserCog, TrendingUp, AlertCircle, Clock, CheckCircle2, XCircle, Ban } from "lucide-react";
+import { Building2, Users, Router, UserCog, AlertCircle, Clock, CheckCircle2, XCircle, Ban } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 
 export function SuperAdminDashboard() {

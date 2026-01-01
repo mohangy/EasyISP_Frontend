@@ -127,7 +127,7 @@ export function ManualPayments() {
                         Recharge Logs
                     </h1>
                     <p className="text-xs md:text-sm text-slate-400 mt-1">
-                        Total Manual Recharges: <span className="text-slate-200 font-medium">KES {TOTAL_AMOUNT}</span>
+                        Total Manual Recharges: <span className="text-slate-200 font-medium">KES {totalAmount.toLocaleString()}</span>
                     </p>
                 </div>
                 <div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Building2, CreditCard, FileText, Key, Settings as SettingsIcon, Loader2, MapPin, Mail, Phone, User, AlertTriangle, Eye, EyeOff, X, HelpCircle, MessageSquare } from "lucide-react";
+import { Building2, CreditCard, FileText, Key, Settings as SettingsIcon, Loader2, MapPin, Mail, Phone, User, MessageSquare } from "lucide-react";
 import { tenantApi, type Tenant, type Invoice } from "../../services/tenantService";
 import toast from "react-hot-toast";
 import { usePermissions } from "../../hooks/usePermissions";
