@@ -276,15 +276,7 @@ export function PPPoEUserDetails() {
         }
     };
 
-    const _handleSendMessage = async (message: string) => {
-        if (!id) return;
-        try {
-            await customerApi.sendMessageToUser(id, message);
-            toast.success("Message sent");
-        } catch {
-            toast.error("Failed to send message");
-        }
-    };
+    // handleSendMessage removed - feature not yet implemented
 
     const handleChangePackage = async (packageId: string) => {
         if (!id) return;
