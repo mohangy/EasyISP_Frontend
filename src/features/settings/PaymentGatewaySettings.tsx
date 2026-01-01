@@ -315,16 +315,6 @@ function PaymentGatewayForm({ gateway, onCancel, onSave }: { gateway: PaymentGat
                             />
                         </div>
 
-                            <input
-                                type="text"
-                                required
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
-                                placeholder="e.g. Main Shop Paybill"
-                            />
-                        </div>
-
                         <div>
                             <label className="block text-sm font-medium text-slate-400 mb-1.5">Gateway Type</label>
                             <select
@@ -341,8 +331,8 @@ function PaymentGatewayForm({ gateway, onCancel, onSave }: { gateway: PaymentGat
                         <div>
                             <label className="block text-sm font-medium text-slate-400 mb-1.5">
                                 {formData.subType === 'BUYGOODS' ? 'Till Number' :
-                                 formData.subType === 'BANK' ? 'Bank Paybill Number' :
-                                 'Paybill Number'}
+                                    formData.subType === 'BANK' ? 'Bank Paybill Number' :
+                                        'Paybill Number'}
                             </label>
                             <input
                                 type="text"
