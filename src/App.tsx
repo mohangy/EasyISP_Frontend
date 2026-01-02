@@ -24,7 +24,7 @@ import { ManualPayments } from "./features/payments/ManualPayments";
 import { SMSOutbox } from "./features/sms/SMSOutbox";
 import { SMSDetails } from "./features/sms/SMSDetails";
 import { FinanceDashboard } from "./features/finance/FinanceDashboard";
-import { Income } from "./features/finance/Income";
+
 import { Expenses } from "./features/finance/Expenses";
 import { Reports } from "./features/finance/Reports";
 import { SuperAdminDashboard } from "./features/superAdmin/SuperAdminDashboard";
@@ -154,11 +154,7 @@ function App() {
                   <FinanceDashboard />
                 </PermissionRoute>
               } />
-              <Route path="/finance/income" element={
-                <PermissionRoute permission={PERMISSIONS.FINANCE_INCOME_VIEW}>
-                  <Income />
-                </PermissionRoute>
-              } />
+
               <Route path="/finance/expenses" element={
                 <PermissionRoute permission={PERMISSIONS.FINANCE_EXPENSES_VIEW}>
                   <Expenses />

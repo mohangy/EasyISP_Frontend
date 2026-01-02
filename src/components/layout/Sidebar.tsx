@@ -17,7 +17,6 @@ import {
     MessageSquare,
     Shield,      // Used (Super Admin)
     // Finance icons
-    TrendingUp,
     Receipt,
     Ticket, // Tickets/Vouchers
     HardDrive, // Equipment
@@ -184,7 +183,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     children: [
                         { name: "Electronic", href: "/payments/electronic", icon: Smartphone, permission: PERMISSIONS.PAYMENTS_VIEW_ELECTRONIC },
                         { name: "Manual", href: "/payments/manual", icon: Banknote, permission: PERMISSIONS.PAYMENTS_VIEW_MANUAL },
-                        { name: "Income", href: "/finance/income", icon: TrendingUp, permission: PERMISSIONS.FINANCE_INCOME_VIEW },
                     ]
                 },
                 {
