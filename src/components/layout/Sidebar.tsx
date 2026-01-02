@@ -18,7 +18,6 @@ import {
     Shield,      // Used (Super Admin)
     // Finance icons
     Ticket, // Tickets/Vouchers
-    HardDrive, // Equipment
     UserCog,
 } from "lucide-react";
 import { tenantApi, type Tenant } from "../../services/tenantService";
@@ -203,7 +202,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     badge: stats.routers,
                     badgeColor: "bg-amber-500/10 text-amber-500"
                 },
-                { name: "Equipment", href: "#", icon: HardDrive, badge: 0, badgeColor: "bg-amber-500/10 text-amber-500" },
                 { name: "Map", href: "/map", icon: MapPin, permission: PERMISSIONS.MAPS_VIEW },
             ]
         }
