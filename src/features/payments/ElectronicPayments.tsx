@@ -27,7 +27,19 @@ export function ElectronicPayments() {
             setLoading(true);
             try {
                 const response = await api.get('/payments/mpesa');
-                setTransactions(response.data || []);
+                // Backend returns { transactions: [...], total, page, pageSize }
+                const data = response.data?.transactions || [];
+                // Map backend field names to frontend interface
+                const mapped = data.map((t: any) => ({
+                    id: t.id,
+                    trxCode: t.transactionId || t.trxCode || '-',
+                    amount: t.amount || 0,
+                    date: t.createdAt ? new Date(t.createdAt).toLocaleString() : (t.date || '-'),
+                    phone: t.phone || '-',
+                    account: t.account || '-',
+                    site: t.customer?.name || '-',
+                }));
+                setTransactions(mapped);
             } catch (error) {
                 console.error("Failed to fetch M-Pesa transactions:", error);
                 setTransactions([]);
@@ -41,9 +53,9 @@ export function ElectronicPayments() {
     // Filter Logic
     const filteredData = useMemo(() => {
         return transactions.filter(item =>
-            item.trxCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.phone.includes(searchQuery) ||
-            item.account.includes(searchQuery)
+            (item.trxCode || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.phone || '').includes(searchQuery) ||
+            (item.account || '').includes(searchQuery)
         );
     }, [searchQuery, transactions]);
 
