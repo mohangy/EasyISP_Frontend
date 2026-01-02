@@ -32,15 +32,15 @@ export function SMSOutbox() {
     const [smsLogs, setSmsLogs] = useState<SMSLog[]>([]);
     const [smsBalance, setSmsBalance] = useState<{ balance: number; provider: string } | null>(null);
 
-    // Fetch SMS balance
+    // Fetch SMS balance and provider
     const fetchSmsBalance = useCallback(async () => {
         try {
             const response = await api.get('/tenant/sms-balance');
             if (response.data.success !== false) {
-                setSmsBalance(prev => ({
-                    provider: prev?.provider || '',
+                setSmsBalance({
                     balance: response.data.balance ?? 0,
-                }));
+                    provider: response.data.provider || '',
+                });
             }
         } catch (error) {
             console.error('Failed to fetch SMS balance:', error);
