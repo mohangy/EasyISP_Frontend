@@ -115,6 +115,12 @@ export const PERMISSIONS = {
     SETTINGS_PAYMENT_GATEWAY: 'settings:payment_gateway',
     SETTINGS_SMS: 'settings:sms',
     SETTINGS_PASSWORD: 'settings:password',
+
+    // ==================== TICKETS ====================
+    TICKETS_VIEW: 'tickets:view',
+    TICKETS_CREATE: 'tickets:create',
+    TICKETS_ASSIGN: 'tickets:assign',
+    TICKETS_RESOLVE: 'tickets:resolve',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];

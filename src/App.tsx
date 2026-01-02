@@ -24,6 +24,7 @@ import { ManualPayments } from "./features/payments/ManualPayments";
 import { SMSOutbox } from "./features/sms/SMSOutbox";
 import { SMSDetails } from "./features/sms/SMSDetails";
 import { FinanceDashboard } from "./features/finance/FinanceDashboard";
+import { Tickets } from "./features/tickets/Tickets";
 
 
 import { Reports } from "./features/finance/Reports";
@@ -145,6 +146,13 @@ function App() {
               <Route path="/sms/:id" element={
                 <PermissionRoute permission={PERMISSIONS.SMS_VIEW}>
                   <SMSDetails />
+                </PermissionRoute>
+              } />
+
+              {/* Tickets */}
+              <Route path="/tickets" element={
+                <PermissionRoute permission={PERMISSIONS.TICKETS_VIEW}>
+                  <Tickets />
                 </PermissionRoute>
               } />
 

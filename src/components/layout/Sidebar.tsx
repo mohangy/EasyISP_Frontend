@@ -156,8 +156,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 // Placeholders disabled or require future permissions
                 {
                     name: "Tickets",
-                    href: "#",
+                    href: "/tickets",
                     icon: Ticket,
+                    permission: PERMISSIONS.TICKETS_VIEW,
                     badge: stats.tickets,
                     badgeColor: "bg-amber-500/10 text-amber-500"
                 },
