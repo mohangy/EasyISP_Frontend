@@ -63,6 +63,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const [stats, setStats] = useState({
         activeUsers: 0,
         totalUsers: 0,
+        pppoeUsers: 0,
+        hotspotUsers: 0,
         packages: 0,
         routers: 0,
         vouchers: 0,
@@ -92,6 +94,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 setStats({
                     activeUsers: dashStats?.activeSessions || 0,
                     totalUsers: dashStats?.totalCustomers || 0,
+                    pppoeUsers: dashStats?.pppoeCustomers || 0,
+                    hotspotUsers: dashStats?.hotspotCustomers || 0,
                     vouchers: (dashStats?.activeVouchers || 0) + (dashStats?.usedVouchers || 0),
                     packages: pkgs.length,
                     routers: routerCount,
@@ -135,7 +139,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     href: "/customers/pppoe",
                     icon: Users,
                     permission: PERMISSIONS.PPPOE_VIEW, // Default to PPPoE permission
-                    badge: stats.totalUsers,
+                    badge: stats.pppoeUsers,
                     badgeColor: "bg-amber-500/10 text-amber-500"
                 },
                 {
@@ -143,7 +147,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     href: "/customers/hotspot",
                     icon: Ticket,
                     permission: PERMISSIONS.HOTSPOT_VIEW,
-                    badge: stats.vouchers,
+                    badge: stats.hotspotUsers,
                     badgeColor: "bg-amber-500/10 text-amber-500"
                 },
                 {
