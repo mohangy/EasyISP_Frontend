@@ -17,7 +17,6 @@ import {
     MessageSquare,
     Shield,      // Used (Super Admin)
     // Finance icons
-    Receipt,
     Ticket, // Tickets/Vouchers
     HardDrive, // Equipment
     UserCog,
@@ -184,12 +183,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         { name: "Electronic", href: "/payments/electronic", icon: Smartphone, permission: PERMISSIONS.PAYMENTS_VIEW_ELECTRONIC },
                         { name: "Manual", href: "/payments/manual", icon: Banknote, permission: PERMISSIONS.PAYMENTS_VIEW_MANUAL },
                     ]
-                },
-                {
-                    name: "Expenses",
-                    href: "/finance/expenses",
-                    icon: Receipt,
-                    permission: PERMISSIONS.FINANCE_EXPENSES_VIEW
                 },
             ]
         },
