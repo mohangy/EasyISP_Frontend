@@ -253,31 +253,114 @@ export const nasApi = {
         return response.data;
     },
 
+    // ==========================================
+    // ENHANCED WIZARD METHODS
+    // ==========================================
+
     /**
-     * Poll provisioning status (Step 2)
+     * Verify router is online and API is reachable
      */
-    async pollProvisioningStatus(token: string): Promise<{ status: 'PENDING' | 'CONNECTED'; routerId?: string }> {
-        const response = await api.get<{ status: 'PENDING' | 'CONNECTED'; routerId?: string }>(`/wizard/${token}/status`);
+    async verifyRouter(routerId: string): Promise<{
+        online: boolean;
+        apiReachable: boolean;
+        message: string;
+    }> {
+        const response = await api.get<{
+            online: boolean;
+            apiReachable: boolean;
+            message: string;
+        }>(`/wizard/${routerId}/verify`);
         return response.data;
     },
 
     /**
-     * Get interfaces from connected router (Step 3)
+     * Get router system resources
      */
-    async getInterfaces(routerId: string): Promise<string[]> {
-        const response = await api.get<{ interfaces: string[] }>(`/wizard/${routerId}/interfaces`);
-        return response.data.interfaces;
+    async getSystemInfo(routerId: string): Promise<{
+        uptime: string;
+        version: string;
+        buildTime: string;
+        freeMemory: number;
+        totalMemory: number;
+        cpu: string;
+        cpuCount: number;
+        cpuFrequency: number;
+        cpuLoad: number;
+        freeHddSpace: number;
+        totalHddSpace: number;
+        architectureName: string;
+        boardName: string;
+        platform: string;
+    }> {
+        const response = await api.get(`/wizard/${routerId}/system-info`);
+        return response.data;
     },
 
     /**
-     * Configure services on router (Step 3 Action)
+     * Get real interfaces from router with WAN detection
      */
-    async configureServices(routerId: string, config: {
-        services: ('pppoe' | 'hotspot')[];
-        ports: string[];
-        subnet: string;
-    }): Promise<{ success: boolean }> {
-        const response = await api.post<{ success: boolean }>(`/wizard/${routerId}/configure`, config);
+    async getRouterInterfaces(routerId: string): Promise<{
+        interfaces: {
+            id: string;
+            name: string;
+            type: string;
+            macAddress: string;
+            running: boolean;
+            disabled: boolean;
+            comment: string;
+            isWan: boolean;
+        }[];
+        wanInterface: string | null;
+    }> {
+        const response = await api.get(`/wizard/${routerId}/interfaces`);
+        return response.data;
+    },
+
+    /**
+     * Configure services on router (PPPoE/Hotspot)
+     */
+    async configureRouterServices(routerId: string, config: {
+        serviceType: 'hotspot' | 'pppoe' | 'both';
+        wanInterface?: string;
+        hotspotConfig?: {
+            interfaces: string[];
+            gatewayIp?: string;
+            poolStart?: string;
+            poolEnd?: string;
+            dnsServers?: string[];
+        };
+        pppoeConfig?: {
+            interfaces: string[];
+            serviceName?: string;
+            localAddress?: string;
+            poolStart?: string;
+            poolEnd?: string;
+        };
+        createBackup?: boolean;
+        configureFirewall?: boolean;
+    }): Promise<{
+        success: boolean;
+        message: string;
+        results: string[];
+        testResult: {
+            hotspot: boolean;
+            pppoe: boolean;
+            radius: boolean;
+        };
+    }> {
+        const response = await api.post(`/wizard/${routerId}/configure`, config);
+        return response.data;
+    },
+
+    /**
+     * Test router configuration
+     */
+    async testRouterConfig(routerId: string): Promise<{
+        hotspot: boolean;
+        pppoe: boolean;
+        radius: boolean;
+    }> {
+        const response = await api.get(`/wizard/${routerId}/test`);
         return response.data;
     },
 };
