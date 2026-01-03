@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search, Plus, Loader2, AlertCircle, CheckCircle2, Clock, User } from "lucide-react";
+import { Search, Plus, Loader2, CheckCircle2, User } from "lucide-react";
 import toast from "react-hot-toast";
 import { Modal } from "../../components/ui/Modal";
 import { usePermissions } from "../../hooks/usePermissions";
@@ -69,7 +69,7 @@ export function Tickets() {
     const fetchTickets = useCallback(async () => {
         setLoading(true);
         try {
-            const status = activeTab === 'open' ? 'OPEN,IN_PROGRESS' : 'RESOLVED,CLOSED';
+            // Fetch tickets based on active tab
             const response = await api.get(`/tickets?status=${activeTab === 'open' ? 'OPEN' : 'RESOLVED'}`);
             setTickets(response.data.tickets || []);
         } catch (error) {

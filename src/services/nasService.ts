@@ -197,10 +197,22 @@ export const nasApi = {
     },
 
     /**
-     * Start wizard for new router onboarding
+     * Start wizard for new router onboarding - only requires router name
      */
-    async startWizard(): Promise<{ token: string; bootstrapScript: string }> {
-        const response = await api.post<{ token: string; bootstrapScript: string }>("/wizard/start");
+    async startWizard(name: string): Promise<{
+        routerId: string;
+        token: string;
+        secret: string;
+        provisionCommand: string;
+        message: string;
+    }> {
+        const response = await api.post<{
+            routerId: string;
+            token: string;
+            secret: string;
+            provisionCommand: string;
+            message: string;
+        }>("/wizard/start", { name });
         return response.data;
     },
 
